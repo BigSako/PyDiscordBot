@@ -114,8 +114,8 @@ class MyDBModel:
         """ returns a list of fleetbot messages by group """
         with self.db.cursor() as cursor:
             sql = """SELECT id, from_character, `timestamp`, message, groupname
-            FROM irc_ping_history WHERE id > %d ORDER BY `timestamp` ASC """
-            cursor.execute(sql, {last_id,})
+            FROM irc_ping_history WHERE id > %s ORDER BY `timestamp` ASC """
+            cursor.execute(sql, {str(last_id),})
 
             messages_by_group = {}
 
