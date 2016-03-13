@@ -1,6 +1,6 @@
 # DISCORD Bot
-This is a DISCORD Bot developed by (BigSako)[https://evewho.com/], which uses
-(discord.py)[https://github.com/Rapptz/discord.py].
+This is a DISCORD Bot developed by [BigSako](http://evewho.com/pilot/BigSako), which uses
+[discord.py](https://github.com/Rapptz/discord.py) and Python 3.4 asyncio.
 
 
 ## Requirements (Pre-Install)
