@@ -197,7 +197,7 @@ class MyDiscordBotClient(discord.Client):
                 for i in range(0, len(msgs)):
                     if msgs[i]['forward']:
                         new_msg = "@everyone " + msgs[i]['message']
-                        yield from send_to_fleetbot_channel(group, new_msg)
+                        yield from self.send_to_fleetbot_channel(group, new_msg)
             else:
                 logging.info("Error: Could not find group with name '{}' to forward ...".format(group))
 
