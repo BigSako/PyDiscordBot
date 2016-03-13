@@ -203,7 +203,7 @@ class MyDiscordBotClient(discord.Client):
 
 
     @asyncio.coroutine
-    def verify_users(self, loop):
+    def verify_users(self):
         # update list of authed members from database
         self.authed_users = self.model.get_all_authed_members()
 
@@ -279,7 +279,7 @@ class MyDiscordBotClient(discord.Client):
     def send_to_debug_channel(self, msg):
         """ sends a message to the debug channel """
         yield from self.send_message(self.debug_channel, "DEBUG: " + msg)
-        
+
 
     @asyncio.coroutine
     def send_to_fleetbot_channel(self, group, msg):
