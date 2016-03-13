@@ -28,7 +28,7 @@ class MyDBModel:
             sql = """SELECT discord_group_id
             FROM groups g, group_membership m, discord_auth a
             WHERE a.discord_member_id=%s AND g.group_id = m.group_id
-            AND m.state = 0
+            AND m.state <= 1
             AND m.user_id = a.user_id AND g.discord_group_id != 0"""
             cursor.execute(sql, (member_id,))
 
@@ -94,4 +94,57 @@ class MyDBModel:
             cursor.close()
 
             return authed_users
+        return {}
+
+    def get_fleetbot_max_message_id(self):
+        """ returns the last max message id from fleetbot messages """
+        with self.db.cursor() as cursor:
+            sql = """SELECT max(id) as max_id FROM irc_ping_history """
+            cursor.execute(sql)
+
+            row = cursor.fetchone()
+            max_id = row['max_id']
+
+            return max_id
+        return 0
+
+
+
+    def get_fleetbot_messages(self, last_id=0):
+        """ returns a list of fleetbot messages by group """
+        with self.db.cursor() as cursor:
+            sql = """SELECT id, from_character, `timestamp`, message, groupname
+            FROM irc_ping_history WHERE id > %d ORDER BY `timestamp` ASC """
+            cursor.execute(sql, {last_id,})
+
+            messages_by_group = {}
+
+            for row in cursor:
+                group = row['groupname']
+                if group not in messages_by_group:
+                    messages_by_group[group] = []
+
+                messages_by_group[group].append(
+                    {
+                        'from': row['from_character'],
+                        'timestamp': row['timestamp'],
+                        'message': row['message'],
+                        'forward': True
+                    }
+                )
+            cursor.close()
+
+            # filter duplicates because fuck spam pings
+            for group in messages_by_group.keys():
+                msgs = messages_by_group[group]
+
+                last_msg = ""
+
+                for i in range(0, len(msgs)):
+                    if msgs[i]['message'] == last_msg:
+                        msgs[i]['forward'] = False
+
+                    last_msg = msgs[i]['message']
+
+            return messages_by_group
         return {}

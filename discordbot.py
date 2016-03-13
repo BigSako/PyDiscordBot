@@ -34,6 +34,8 @@ class MyDiscordBotClient(discord.Client):
         # Store a couple of destinations for messages
         self.debug_channel = None
 
+        self.group_channels = {}
+
         # call super class init
         super(MyDiscordBotClient, self).__init__()
 
@@ -59,6 +61,10 @@ class MyDiscordBotClient(discord.Client):
             if channel.name == self.debug_channel_name:
                 logging.info("Found debug channel '{}'".format(self.debug_channel_name))
                 self.debug_channel = channel
+            elif channel.name == fleetbot_ncdot_channel_name:
+                self.group_channels['BC/NORTHERN_COALITION'] = channel
+            elif channel.name == fleetbot_sm3ll_channel_name:
+                self.group_channels['BC/BURNING_NAPALM'] = channel
 
         print("Roles=")
         for role in main_server.roles:
@@ -74,6 +80,7 @@ class MyDiscordBotClient(discord.Client):
         # verify users, run this until the end
         loop = asyncio.get_event_loop()
         yield from self.verify_users(loop)
+        yield from self.forward_fleetbot_messages(loop)
 
 
     @asyncio.coroutine
@@ -161,6 +168,31 @@ class MyDiscordBotClient(discord.Client):
         if len(roles_to_add) > 0:
             yield from self.add_roles(member, *roles_to_add)
 
+    @asyncio.coroutine
+    def forward_fleetbot_messages(self, loop):
+        logging.info("Starting loop: Checking for fleetbot messages")
+
+        last_id = self.model.get_fleetbot_max_message_id()
+
+        while True:
+            # get up2date messages from database
+            messages = self.model.get_fleetbot_messages(last_id)
+            # go over all groups
+            for group in messages.keys():
+                if group in self.group_channels.keys():
+                    msgs = messages[group]
+                    logging.info("There are {} messages available for group {}".format(len(msgs), group))
+
+                    for i in range(0, len(msgs)):
+                        if msgs[i]['forward']:
+                            new_msg = "@everyone " + msgs[i]['message']
+                            send_to_fleetbot_channel(group, new_msg)
+
+            last_id = self.model.get_fleetbot_max_message_id()
+
+            # interrupt loop for 30 seconds
+            yield from asyncio.sleep(30)
+
 
     @asyncio.coroutine
     def verify_users(self, loop):
@@ -182,6 +214,9 @@ class MyDiscordBotClient(discord.Client):
             for member in self.get_all_members():
                 if member.id == self.user.id:
                     continue # ship yourself
+
+                if str(member.status) == 'Offline':
+                    continue # no need to process offline members for now
 
                 member_id = str(member.id)
 
@@ -245,6 +280,10 @@ class MyDiscordBotClient(discord.Client):
         yield from self.send_message(self.debug_channel, "DEBUG: " + msg)
 
 
+    def send_to_fleetbot_channel(self, group, msg):
+        """ sends a message to a fleetbot channel """
+        if group in self.group_channels.keys():
+            yield from self.send_message(self.group_channels[group], msg)
 
 
 
