@@ -1,4 +1,7 @@
 # DISCORD Bot
+This is a DISCORD Bot developed by (BigSako)[https://evewho.com/], which uses
+(discord.py)[https://github.com/Rapptz/discord.py].
+
 
 ## Requirements (Pre-Install)
  * git
@@ -7,7 +10,7 @@
 
 E.g., on Ubuntu/Debian:
 ```
-sudo apt-get install python-virtualenv
+sudo apt-get install python-virtualenv python3.4
 sudo apt-get install git
 ```
 
@@ -25,7 +28,25 @@ pip install git+https://github.com/Rapptz/discord.py@async
 pip install -r requirements.txt
 ```
 
-Then configure the bot (edit or better copy defaults.cfg), and run it with
+Then configure the bot (edit or better copy defaults.cfg)
+```
+[Database]
+dbhost:localhost
+dbuser:nouser
+dbpass:nopass
+dbname:nodb
+
+[Discord]
+discorduser:nouser
+discordpass:nopass
+
+[Bot]
+debug_channel_name:bot_debug
+auth_website:http://localhost
+
+```
+
+and run it with
 
 ```
 python runbot.py --config yourcfg.cfg
