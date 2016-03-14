@@ -82,7 +82,7 @@ class MyDiscordBotClient(discord.Client):
 
     @asyncio.coroutine
     def handle_auth_token(self, author, auth_token):
-        """ handles an auth token """
+        """ handles an auth token sent by author """
 
         logging.info("Verifying auth token '%s'", auth_token)
         if self.model.is_auth_code_in_table(auth_token):
@@ -98,7 +98,7 @@ class MyDiscordBotClient(discord.Client):
 
             # assign roles for this user
             tmproles = self.model.get_roles_for_member(str(author.id))
-            logging.info("Member {} will be assigned the following roles: {}".format(author.name, tmproles))
+            logging.info("Member %s will be assigned the following roles: %s", author.name, str(tmproles))
 
             new_roles = [self.roles[str(f)] for f in tmproles]
 
@@ -127,11 +127,17 @@ class MyDiscordBotClient(discord.Client):
                         logging.error("User %s (id=%s) tried to auth, but is already authed!",
                                       message.author.name, str(message.author.id))
 
-                    logging.info("Auth token received from user '%s' (ID: %s): '%s'", str(message.author), str(message.author.id), str(message.content))
-                    # remove "auth=" from that string"
-                    auth_code = str(message.content).replace("auth=", "")
+                        yield from self.send_message(message.author,
+                                                     "ERROR: You are trying to auth, but you already authed before...")
+                        self.send_to_debug_channel("ERROR User {} (id: {}) tried to auth twice...".format(message.author, message.author.id))
+                    else:
+                        logging.info("Auth token received from user '%s' (ID: %s): '%s'", str(message.author), str(message.author.id), str(message.content))
+                        # remove "auth=" from that string"
+                        auth_code = str(message.content).replace("auth=", "")
 
-                    yield from self.handle_auth_token(message.author, auth_code)
+                        self.send_to_debug_channel("User {} just entered an auth token, verifying...".format(message.author))
+
+                        yield from self.handle_auth_token(message.author, auth_code)
                 else:
                     yield from self.send_message(message.author,
                                                  "I am sorry, I did not understand what you said.")
