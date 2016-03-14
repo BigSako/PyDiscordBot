@@ -80,8 +80,6 @@ class MyDiscordBotClient(discord.Client):
         # verify users, run this until the end
         loop = asyncio.get_event_loop()
         yield from self.run_my_loop(loop)
-        yield from self.verify_users(loop)
-        yield from self.forward_fleetbot_messages(loop)
 
 
     @asyncio.coroutine
@@ -137,7 +135,8 @@ class MyDiscordBotClient(discord.Client):
 
     @asyncio.coroutine
     def verify_member_roles(self, member, member_id):
-        """ adds or removes member roles """
+        """ checks the roles of a single member, and adds or removes them as needed """
+        
         # which roles should this member have
         should_have_roles = self.model.get_roles_for_member(member_id)
 
@@ -174,12 +173,16 @@ class MyDiscordBotClient(discord.Client):
     def run_my_loop(self, loop):
         logging.info("Starting run_my_loop...")
 
-        last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
+        # store the highest fleetbot message id
+        last_fleetbot_msg_id = yield from self.model.get_fleetbot_max_message_id()
 
         while True:
+            # execute verify users
             yield from self.verify_users()
+            # execute fleetbot message forwarding
             yield from self.forward_fleetbot_messages(last_fleetbot_msg_id)
 
+            # update highest fleetbot message id
             last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
 
             yield from asyncio.sleep(30)
