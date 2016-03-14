@@ -129,13 +129,13 @@ class MyDiscordBotClient(discord.Client):
 
                         yield from self.send_message(message.author,
                                                      "ERROR: You are trying to auth, but you already authed before...")
-                        self.send_to_debug_channel("ERROR User {} (id: {}) tried to auth twice...".format(message.author, message.author.id))
+                        yield from self.send_to_debug_channel("ERROR User {} (id: {}) tried to auth twice...".format(message.author, message.author.id))
                     else:
                         logging.info("Auth token received from user '%s' (ID: %s): '%s'", str(message.author), str(message.author.id), str(message.content))
                         # remove "auth=" from that string"
                         auth_code = str(message.content).replace("auth=", "")
 
-                        self.send_to_debug_channel("User {} just entered an auth token, verifying...".format(message.author))
+                        yield from self.send_to_debug_channel("User {} just entered an auth token, verifying...".format(message.author))
 
                         yield from self.handle_auth_token(message.author, auth_code)
                 else:
@@ -143,6 +143,18 @@ class MyDiscordBotClient(discord.Client):
                                                  "I am sorry, I did not understand what you said.")
             else:
                 logging.info("Message received in channel '" + str(message.channel) + "' from '" + str(message.author) + "': '" + str(message.content) + "'")
+                msg = str(message.content)
+                if msg.startswith("!"):
+                    # this is most likely a command
+                    if msg.startswith("!whoami"):
+                        # see who this user is
+                        if str(message.author.id) in self.authed_users:
+                            # authed
+                            char_data = self.model.get_discord_members_character_id(str(message.author.id))
+                            yield from self.send_message(message.channel, "@" + str(message.author.name) + " is also known as " + str(char_data))
+                        else:
+                            yield from self.send_message(message.channel, "@" + str(message.author.name) + " I am sorry, I do not know you!")
+
         else:
             logging.debug("Ignoring message, because its from ourselves...")
 
