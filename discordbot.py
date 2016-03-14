@@ -181,7 +181,7 @@ class MyDiscordBotClient(discord.Client):
         logging.info("Starting run_my_loop...")
 
         # store the highest fleetbot message id
-        last_fleetbot_msg_id = yield from self.model.get_fleetbot_max_message_id()
+        last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
 
         while True:
             # execute verify users
