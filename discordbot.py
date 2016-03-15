@@ -23,7 +23,8 @@ cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
                    "Okay, but only one more :cookie:!", "I like cookies too! :thumbsup:",
                    "Please wait, while we process your request...", "Free Cookies for everyone! :cookie: :cookie: :cookie: :cookie: :cookie:",
                    "Omnomnomnomnom... You want a :cookie: too?", "Java.Lang.OutOfCookieException(Deathwhisper ate all my cookies) :(",
-                   "Are you sure?", "The cookie is a lie!", "Ofcourse! Here is a :cookie: for you!"]
+                   "Are you sure?", "The cookie is a lie!", "Ofcourse! Here is a :cookie: for you!",
+                   "Share your :cookie: with a friend!", "Cookie? :cookie:", "NO!"]
 
 
 # Create a subclass of Client that defines our own event handlers
