@@ -19,7 +19,11 @@ fleetbot_supers_channel_name = "fleetbot_supers"
 cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
                    "Have two :cookie:", "Sorry, I am out of cookies! Oh wait, found one! :cookie:",
                    "C is for :cookie:", "https://www.youtube.com/watch?v=Ye8mB6VsUHw",
-                   "https://www.youtube.com/watch?v=-qTIGg3I5y8"]
+                   "https://www.youtube.com/watch?v=-qTIGg3I5y8", "I think you had enough!",
+                   "Okay, but only one more :cookie:!", "I like cookies too! :thumbsup:",
+                   "Please wait, while we process your request...", "Free Cookies for everyone! :cookie: :cookie: :cookie: :cookie: :cookie:",
+                   "Omnomnomnomnom... You want a :cookie: too?", "Java.Lang.OutOfCookieException(Deathwhisper ate all my cookies) :(",
+                   "Are you sure?", "The cookie is a lie!", "Ofcourse! Here is a :cookie: for you!"]
 
 
 # Create a subclass of Client that defines our own event handlers
