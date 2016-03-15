@@ -44,12 +44,14 @@ class MyDBModel:
     def is_auth_code_in_table(self, auth_code):
         with self.db.cursor() as cursor:
             # Read a single record
-            sql = "SELECT user_id from discord_auth WHERE discord_auth_token=%s AND discord_member_id = '' "
+            sql = "SELECT COUNT(*) as cnt_authed from discord_auth WHERE discord_auth_token=%s AND discord_member_id = '' "
             cursor.execute(sql, (auth_code,))
             result = cursor.fetchone()
-            print(result)
+            retval = False
+            if result['cnt_authed'] == 1:
+                retval = True
             cursor.close()
-            return True
+            return retval
 
         return False
 
