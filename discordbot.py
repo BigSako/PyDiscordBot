@@ -153,7 +153,7 @@ class MyDiscordBotClient(discord.Client):
                 logging.info("Message received in channel '" + str(message.channel) + "' from '" + str(message.author) + "': '" + str(message.content) + "'")
                 msg = str(message.content)
                 if str(message.channel) == "just_cookies":
-                    idx = random.randint() % len(cookie_messages)
+                    idx = random.randint(0,len(cookie_messages)) % len(cookie_messages)
                     yield from self.send_message(message.channel, cookie_messages[idx])
                 elif msg.startswith("!"):
                     # this is most likely a command
