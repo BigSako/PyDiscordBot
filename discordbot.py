@@ -126,6 +126,7 @@ class MyDiscordBotClient(discord.Client):
 
         else:
             yield from self.send_message(author, "Sorry, I did not recognize the auth code you sent me!")
+            yield from self.send_to_debug_channel("User {} entered auth key {}, but I could not find it in database".format(author.name, auth_token))
 
     @asyncio.coroutine
     def on_message(self, message):

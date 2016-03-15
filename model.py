@@ -48,8 +48,10 @@ class MyDBModel:
             cursor.execute(sql, (auth_code,))
             result = cursor.fetchone()
             retval = False
-            if result['cnt_authed'] == 1:
+            if result['cnt_authed'] == 1 or result['cnt_authed'] == "1":
                 retval = True
+            else:
+                print("Auth name not found? cnt_authed=" + str(result['cnt_authed']))
             cursor.close()
             return retval
 
