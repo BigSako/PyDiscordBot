@@ -3,15 +3,23 @@
 import asyncio
 import logging
 import datetime
+import random
 
 import discord
 from model import MyDBModel
+
 
 
 # TODO: Remove these static names and put them into a config
 fleetbot_ncdot_channel_name = "fleetbot_ncdot"
 fleetbot_sm3ll_channel_name = "fleetbot_sm3ll"
 fleetbot_supers_channel_name = "fleetbot_supers"
+
+
+cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
+                   "Have two :cookie:", "Sorry, I am out of cookies! Oh wait, found one! :cookie:",
+                   "C is for :cookie:", "https://www.youtube.com/watch?v=Ye8mB6VsUHw",
+                   "https://www.youtube.com/watch?v=-qTIGg3I5y8"]
 
 
 # Create a subclass of Client that defines our own event handlers
@@ -73,7 +81,7 @@ class MyDiscordBotClient(discord.Client):
         self.everyone_group = main_server.default_role
 
         # Send a message to a destination
-        self.send_to_debug_channel("I am back {}!".format(str(datetime.datetime.now())))
+        yield from self.send_to_debug_channel("I am back {}!".format(str(datetime.datetime.now())))
 
         # verify users, run this until the end
         loop = asyncio.get_event_loop()
@@ -144,7 +152,10 @@ class MyDiscordBotClient(discord.Client):
             else:
                 logging.info("Message received in channel '" + str(message.channel) + "' from '" + str(message.author) + "': '" + str(message.content) + "'")
                 msg = str(message.content)
-                if msg.startswith("!"):
+                if str(message.channel) == "just_cookies":
+                    idx = random.randint() % len(cookie_messages)
+                    yield from self.send_message(message.channel, cookie_messages[idx])
+                elif msg.startswith("!"):
                     # this is most likely a command
                     if msg.startswith("!whoami"):
                         # see who this user is
