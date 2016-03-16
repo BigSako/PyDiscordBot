@@ -96,8 +96,8 @@ class MyDiscordBotClient(discord.Client):
         # verify users, run this until the end
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor(2)
-        verify_users_loop = loop.run_in_executor(executor, self.verify_users)
-        forward_fleetbot_loop = loop.run_in_executor(executor, self.forward_fleetbot_messages)
+        verify_users_loop = loop.async(self.verify_users())
+        forward_fleetbot_loop = loop.async(self.forward_fleetbot_messages())
 
 
     @asyncio.coroutine
