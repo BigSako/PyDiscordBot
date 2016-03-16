@@ -96,8 +96,8 @@ class MyDiscordBotClient(discord.Client):
         # verify users, run this until the end
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor(2)
-        verify_users_loop = asyncio.ensure_future(loop.run_in_executor(executor, self.verify_users))
-        forward_fleetbot_loop = asyncio.ensure_future(loop.run_in_executor(executor, self.forward_fleetbot_messages))
+        verify_users_loop = loop.run_in_executor(executor, self.verify_users)
+        forward_fleetbot_loop = loop.run_in_executor(executor, self.forward_fleetbot_messages)
 
 
     @asyncio.coroutine
@@ -219,7 +219,7 @@ class MyDiscordBotClient(discord.Client):
 
 
     @asyncio.coroutine
-    def forward_fleetbot_messages(self, last_fleetbot_msg_id):
+    def forward_fleetbot_messages(self):
         """ Method for forwarding messages to fleetbot channels """
         logging.info("starting forward_fleetbot_messages")
 
