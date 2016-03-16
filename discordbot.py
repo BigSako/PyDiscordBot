@@ -5,6 +5,8 @@ import logging
 import datetime
 import random
 
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+
 import discord
 from model import MyDBModel
 
@@ -93,7 +95,9 @@ class MyDiscordBotClient(discord.Client):
 
         # verify users, run this until the end
         loop = asyncio.get_event_loop()
-        yield from self.run_my_loop(loop)
+        executor = ThreadPoolExecutor(2)
+        verify_users_loop = asyncio.ensure_future(loop.run_in_executor(executor, self.verify_users))
+        forward_fleetbot_loop = asyncio.ensure_future(loop.run_in_executor(executor, self.forward_fleetbot_messages))
 
 
     @asyncio.coroutine
@@ -215,112 +219,115 @@ class MyDiscordBotClient(discord.Client):
 
 
     @asyncio.coroutine
-    def run_my_loop(self, loop):
-        logging.info("Starting run_my_loop...")
+    def forward_fleetbot_messages(self, last_fleetbot_msg_id):
+        """ Method for forwarding messages to fleetbot channels """
+        logging.info("starting forward_fleetbot_messages")
 
         # store the highest fleetbot message id
         last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
 
         while True:
-            # execute verify users
-            yield from self.verify_users()
-            # execute fleetbot message forwarding
-            yield from self.forward_fleetbot_messages(last_fleetbot_msg_id)
+            logging.info("Checking if there are new messages to forward for fleetbot")
+            # get up2date messages from database
+            messages = self.model.get_fleetbot_messages(last_fleetbot_msg_id)
+            # go over all groups
+            for group in messages.keys():
+                if group in self.group_channels.keys():
+                    msgs = messages[group]
+                    logging.info("There are %d messages available for group %s", len(msgs), group)
+
+                    for i in range(0, len(msgs)):
+                        if msgs[i]['forward']:
+                            new_msg = "@everyone " + msgs[i]['message']
+                            yield from self.send_to_fleetbot_channel(group, new_msg)
+                else:
+                    logging.info("Error: Could not find group with name '%s' to forward ...", group)
 
             # update highest fleetbot message id
             last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
 
             yield from asyncio.sleep(30)
-
-    @asyncio.coroutine
-    def forward_fleetbot_messages(self, last_fleetbot_msg_id):
-        """ Method for forwarding messages to fleetbot channels """
-        # get up2date messages from database
-        messages = self.model.get_fleetbot_messages(last_fleetbot_msg_id)
-        # go over all groups
-        for group in messages.keys():
-            if group in self.group_channels.keys():
-                msgs = messages[group]
-                logging.info("There are %d messages available for group %s", len(msgs), group)
-
-                for i in range(0, len(msgs)):
-                    if msgs[i]['forward']:
-                        new_msg = "@everyone " + msgs[i]['message']
-                        yield from self.send_to_fleetbot_channel(group, new_msg)
-            else:
-                logging.info("Error: Could not find group with name '%s' to forward ...", group)
+        # end while
+    # end def forward_fleetbot_messages
 
 
     @asyncio.coroutine
     def verify_users(self):
-        # update list of authed members from database
-        self.authed_users = self.model.get_all_authed_members()
+        """ verify that groups of all users currently online are valid"""
+        logging.info("Start loop: Verifying roles of users")
 
-        newOnlineMembers = {}
-        allOnlineMembers = {}
+        while True:
+            # update list of authed members from database
+            self.authed_users = self.model.get_all_authed_members()
 
-        number_authed_users = 0
+            newOnlineMembers = {}
+            allOnlineMembers = {}
 
-        logging.info("Checking all members that are connected on server...")
+            number_authed_users = 0
 
-
-        # iterate over all members:
-        for member in self.get_all_members():
-            if member.id == self.user.id:
-                continue # ship yourself
-
-            if str(member.status) == 'offline':
-                continue # no need to process offline members for now
-
-            member_id = str(member.id)
-
-            # store in all online members
-            allOnlineMembers[member_id] = member
-
-            # if this user already known/authed?
-            if member_id in self.authed_users:
-                number_authed_users += 1
-
-                if member_id not in self.currently_online_members:
-                    logging.info("User {} just connected, already authed!".format(member.name))
-                    self.send_to_debug_channel("User {} just connected, already authed!".format(member.name))
-                    newOnlineMembers[member_id] = member
-
-                # else: we already know this user, user is authed. check for any role updates
-                yield from self.verify_member_roles(member, member_id)
-
-            else: # we do not know this user
-                # make sure this user has no roles (other than everyone)
-                if len(member.roles) > 1:
-                    logging.info("Found non-authed member {} with roles {}, removing them...".format(member.name, member.roles))
-                    roles_to_remove = []
-                    for role in member.roles:
-                        if role != self.everyone_group:
-                            roles_to_remove.append(role)
-                    # remove those roles
-                    yield from self.remove_roles(member, *roles_to_remove)
+            logging.info("Checking all members that are connected on server...")
 
 
-                if member_id not in self.currently_online_members:
-                    logging.info("A new user connected to the server: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))
-                    newOnlineMembers[member_id] = member
+            # iterate over all members:
+            for member in self.get_all_members():
+                if member.id == self.user.id:
+                    continue # ship yourself
 
-                    # this user just got online and is not authed! ask this user to auth
-                    yield from self.send_message(member,
-                        """Hi! You need to authenticate to be able to use this Discord server.
-                        Please go to {} to obtain your authorization token, and then just message it to me!""".format( self.auth_website))
-                    self.send_to_debug_channel("User {} just connected, asking user to auth...".format(member.name))
-                else:
-                    # this user has been online for some time, no need to ask to auth again (I guess)
-                    logging.info("Waiting on auth for user: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))
+                if str(member.status) == 'offline':
+                    continue # no need to process offline members for now
 
-        # now each member that has been in currently_online_members needs to be checked if still online
-        for member_id in self.currently_online_members.keys():
-            if member_id not in allOnlineMembers:
-                member = self.currently_online_members[member_id]
-                logging.info("Member %s went offline!", member.name)
+                member_id = str(member.id)
 
-        self.currently_online_members = allOnlineMembers
+                # store in all online members
+                allOnlineMembers[member_id] = member
+
+                # if this user already known/authed?
+                if member_id in self.authed_users:
+                    number_authed_users += 1
+
+                    if member_id not in self.currently_online_members:
+                        logging.info("User {} just connected, already authed!".format(member.name))
+                        self.send_to_debug_channel("User {} just connected, already authed!".format(member.name))
+                        newOnlineMembers[member_id] = member
+
+                    # else: we already know this user, user is authed. check for any role updates
+                    yield from self.verify_member_roles(member, member_id)
+
+                else: # we do not know this user
+                    # make sure this user has no roles (other than everyone)
+                    if len(member.roles) > 1:
+                        logging.info("Found non-authed member {} with roles {}, removing them...".format(member.name, member.roles))
+                        roles_to_remove = []
+                        for role in member.roles:
+                            if role != self.everyone_group:
+                                roles_to_remove.append(role)
+                        # remove those roles
+                        yield from self.remove_roles(member, *roles_to_remove)
+
+
+                    if member_id not in self.currently_online_members:
+                        logging.info("A new user connected to the server: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))
+                        newOnlineMembers[member_id] = member
+
+                        # this user just got online and is not authed! ask this user to auth
+                        yield from self.send_message(member,
+                            """Hi! You need to authenticate to be able to use this Discord server.
+                            Please go to {} to obtain your authorization token, and then just message it to me!""".format( self.auth_website))
+                        self.send_to_debug_channel("User {} just connected, asking user to auth...".format(member.name))
+                    else:
+                        # this user has been online for some time, no need to ask to auth again (I guess)
+                        logging.info("Waiting on auth for user: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))
+
+            # now each member that has been in currently_online_members needs to be checked if still online
+            for member_id in self.currently_online_members.keys():
+                if member_id not in allOnlineMembers:
+                    member = self.currently_online_members[member_id]
+                    logging.info("Member %s went offline!", member.name)
+
+            self.currently_online_members = allOnlineMembers
+
+            yield from asyncio.sleep(30)
+        # end while
     # end everify users
 
 
