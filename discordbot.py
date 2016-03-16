@@ -218,7 +218,6 @@ class MyDiscordBotClient(discord.Client):
             yield from self.add_roles(member, *roles_to_add)
 
 
-    @asyncio.coroutine
     def forward_fleetbot_messages(self):
         """ Method for forwarding messages to fleetbot channels """
         logging.info("starting forward_fleetbot_messages")
@@ -251,7 +250,6 @@ class MyDiscordBotClient(discord.Client):
     # end def forward_fleetbot_messages
 
 
-    @asyncio.coroutine
     def verify_users(self):
         """ verify that groups of all users currently online are valid"""
         logging.info("Start loop: Verifying roles of users")
