@@ -65,7 +65,8 @@ class MyBotApp:
 
         client = MyDiscordBotClient(self.db,
                                     config.get('Bot', 'debug_channel_name'),
-                                    config.get('Bot', 'auth_website'))
+                                    config.get('Bot', 'auth_website'),
+                                    config.get('Discord', 'discordserverid'))
         client.run(config.get('Discord', 'discorduser'),
                    config.get('Discord', 'discordpass'))
 

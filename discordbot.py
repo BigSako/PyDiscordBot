@@ -10,7 +10,10 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import discord
 from model import MyDBModel
 
+import bot_commands
+from bot_commands import AbstractBotCommand
 
+import importlib
 
 # TODO: Remove these static names and put them into a config
 fleetbot_ncdot_channel_name = "fleetbot_ncdot"
@@ -37,11 +40,12 @@ cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
 class MyDiscordBotClient(discord.Client):
     """ Creates a discord client application based on discord.Client, which
     handles authentication with a pre-defined EvE Online auth database """
-    def __init__(self, db, debug_channel_name, auth_website):
+    def __init__(self, db, debug_channel_name, auth_website, main_server_id):
         self.db = db # the database
         self.debug_channel_name = debug_channel_name
         self.auth_website = auth_website
 
+        # store the database model
         self.model = MyDBModel(self.db)
 
         self.authed_users = {}
@@ -55,6 +59,11 @@ class MyDiscordBotClient(discord.Client):
         self.roles = {}
         self.everyone_group = None
 
+        self.main_server_id = main_server_id
+
+        # store the time when the bot started
+        self.start_time = datetime.datetime.now()
+
         # call super class init
         super(MyDiscordBotClient, self).__init__()
 
@@ -65,13 +74,37 @@ class MyDiscordBotClient(discord.Client):
         logging.info("OnReady: Logged in as %s (id: %d)",
                      self.user.name, self.user.id)
 
+        logging.info("Checking which servers we are connected to")
         for serv in self.servers:
-            print(dir(serv))
-            main_server = serv
+            if serv.id == self.main_server_id:
+                main_server = serv
+                print("Found main server! ", serv)
+            else:
+                print("skipping server ", serv)
 
-        # Enumerate the channels. This works over all servers the user is participating in
-        print('Channels')
-        for channel in self.get_all_channels():
+        # update list of available channels
+        self.update_channels(main_server)
+
+        # update list of available roles
+        self.update_roles(main_server)
+
+        # Send a message to a destination
+        yield from self.send_to_debug_channel("I am back {}!".format(str(datetime.datetime.now())))
+
+        AbstractBotCommand.import_bot_commands(self.model, self)
+
+        # verify users, run this until the end
+        logging.info("starting async loops...")
+        loop = asyncio.get_event_loop()
+        verify_users_loop = asyncio.async(self.verify_users(main_server))
+        forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
+
+
+    def update_channels(self, server):
+        """ Updates the list of channels """
+        logging.info("Updating channel list")
+
+        for channel in server.channels:
             print(' ', channel.server, channel.name, channel.type)
             if channel.name == self.debug_channel_name:
                 logging.info("Found debug channel '%s'", self.debug_channel_name)
@@ -83,20 +116,15 @@ class MyDiscordBotClient(discord.Client):
                 logging.info("Found fleetbot sm3ll channel '%s'", fleetbot_sm3ll_channel_name)
                 self.group_channels['BC/BURNING_NAPALM'] = channel
 
-        print("Roles=")
-        for role in main_server.roles:
-            print(role, role.id, role.name)
+    def update_roles(self, server):
+        """ Update the list of roles """
+        self.roles.clear()
+
+        for role in server.roles:
+            logging.info("Found role %s (id: %s, name: %s)", role, role.id, role.name)
             self.roles[role.id] = role
 
-        self.everyone_group = main_server.default_role
-
-        # Send a message to a destination
-        yield from self.send_to_debug_channel("I am back {}!".format(str(datetime.datetime.now())))
-
-        # verify users, run this until the end
-        loop = asyncio.get_event_loop()
-        verify_users_loop = asyncio.async(self.verify_users())
-        forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
+        self.everyone_group = server.default_role
 
 
     @asyncio.coroutine
@@ -167,17 +195,20 @@ class MyDiscordBotClient(discord.Client):
                 if str(message.channel) == "just_cookies":
                     idx = random.randint(0,len(cookie_messages)) % len(cookie_messages)
                     yield from self.send_message(message.channel, cookie_messages[idx])
+                elif msg.startswith("!reload_commands") and message.channel == self.debug_channel:
+                    logging.info("trying to reload bot commands...")
+                    importlib.reload(bot_commands)
+                    AbstractBotCommand.import_bot_commands(self.model, self)
+                    avail_cmds = " ".join(AbstractBotCommand.available_commands.keys())
+                    yield from self.send_to_debug_channel("Commands reloaded! Available commands: " + avail_cmds)
+                elif msg.upper().startswith("I LOVE"):
+                    yield from self.send_message(message.channel, "I am sure you do ;)")
+                elif msg.upper().startswith("I HATE"):
+                    yield from self.send_message(message.channel, "Haters gonna hate!")
+                elif msg.upper().startswith("I DISLIKE"):
+                    yield from self.send_message(message.channel, "I guess that's a valid opionion!")
                 elif msg.startswith("!"):
-                    # this is most likely a command
-                    if msg.startswith("!whoami"):
-                        # see who this user is
-                        if str(message.author.id) in self.authed_users:
-                            # authed
-                            char_data = self.model.get_discord_members_character_id(str(message.author.id))
-                            yield from self.send_message(message.channel, "@" + str(message.author.name) + " is also known as " + str(char_data))
-                        else:
-                            yield from self.send_message(message.channel, "@" + str(message.author.name) + " I am sorry, I do not know you!")
-
+                    yield from AbstractBotCommand.handle_msg(message)
         else:
             logging.debug("Ignoring message, because its from ourselves...")
 
@@ -249,13 +280,14 @@ class MyDiscordBotClient(discord.Client):
     # end def forward_fleetbot_messages
 
 
-    def verify_users(self):
+    def verify_users(self, server):
         """ verify that groups of all users currently online are valid"""
         logging.info("Start loop: Verifying roles of users")
 
         while True:
             # update list of authed members from database
             self.authed_users = self.model.get_all_authed_members()
+            logging.info("Received %s authed users from database", len(self.authed_users))
 
             newOnlineMembers = {}
             allOnlineMembers = {}
@@ -266,7 +298,7 @@ class MyDiscordBotClient(discord.Client):
 
 
             # iterate over all members:
-            for member in self.get_all_members():
+            for member in server.members:
                 if member.id == self.user.id:
                     continue # ship yourself
 
@@ -283,8 +315,7 @@ class MyDiscordBotClient(discord.Client):
                     number_authed_users += 1
 
                     if member_id not in self.currently_online_members:
-                        logging.info("User {} just connected, already authed!".format(member.name))
-                        self.send_to_debug_channel("User {} just connected, already authed!".format(member.name))
+                        logging.info("User %s just connected, already authed!", member.name)
                         newOnlineMembers[member_id] = member
 
                     # else: we already know this user, user is authed. check for any role updates
@@ -293,7 +324,7 @@ class MyDiscordBotClient(discord.Client):
                 else: # we do not know this user
                     # make sure this user has no roles (other than everyone)
                     if len(member.roles) > 1:
-                        logging.info("Found non-authed member {} with roles {}, removing them...".format(member.name, member.roles))
+                        logging.info("Found non-authed member %s with roles %s, removing them...", member.name, member.roles)
                         roles_to_remove = []
                         for role in member.roles:
                             if role != self.everyone_group:
@@ -308,12 +339,11 @@ class MyDiscordBotClient(discord.Client):
 
                         # this user just got online and is not authed! ask this user to auth
                         yield from self.send_message(member,
-                            """Hi! You need to authenticate to be able to use this Discord server.
-                            Please go to {} to obtain your authorization token, and then just message it to me!""".format( self.auth_website))
-                        self.send_to_debug_channel("User {} just connected, asking user to auth...".format(member.name))
+                                                     """Hi! You need to authenticate to be able to use this Discord server. Please go to {} to obtain your authorization token (starting with auth=), and then just message the full token (including auth=) to me!""".format(self.auth_website))
+                        yield from self.send_to_debug_channel("Non authed user {} just connected, asking user to auth...".format(member.name))
                     else:
                         # this user has been online for some time, no need to ask to auth again (I guess)
-                        logging.info("Waiting on auth for user: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))
+                        logging.info("Waiting on auth for user: Name='%s', Status='%s', ID='%s', Server='%s'",member.name, member.status, member_id, member.server)
 
             # now each member that has been in currently_online_members needs to be checked if still online
             for member_id in self.currently_online_members.keys():
