@@ -189,7 +189,7 @@ class MyDiscordBotClient(discord.Client):
                     yield from self.send_message(message.author,
                                                  "I am sorry, I did not understand what you said.")
             else:
-                logging.info("Message received in channel '" + str(message.channel) + "' from '" + str(message.author) + "': '" + str(message.content) + "'")
+                #logging.info("Message received in channel '" + str(message.channel) + "' from '" + str(message.author) + "': '" + str(message.content) + "'")
                 msg = str(message.content)
                 if str(message.channel) == "just_cookies":
                     idx = random.randint(0,len(cookie_messages)) % len(cookie_messages)
@@ -267,6 +267,7 @@ class MyDiscordBotClient(discord.Client):
                     for i in range(0, len(msgs)):
                         if msgs[i]['forward']:
                             new_msg = "@everyone " + msgs[i]['message']
+                            logging.info("Fleetbot(%s): %s", group, new_msg)
                             yield from self.send_to_fleetbot_channel(group, new_msg)
                 else:
                     logging.info("Error: Could not find group with name '%s' to forward ...", group)
@@ -331,6 +332,9 @@ class MyDiscordBotClient(discord.Client):
                         # remove those roles
                         yield from self.remove_roles(member, *roles_to_remove)
 
+                    # no need to go any further with offline users
+                    if str(member.status) == 'offline':
+                        continue
 
                     if member_id not in self.currently_online_members:
                         logging.info("A new user connected to the server: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))

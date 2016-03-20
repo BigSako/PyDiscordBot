@@ -124,6 +124,8 @@ class MyDBModel:
 
             messages_by_group = {}
 
+            msg_cnt = 0
+
             for row in cursor:
                 group = row['groupname']
                 if group not in messages_by_group:
@@ -138,8 +140,14 @@ class MyDBModel:
                         'forward': True
                     }
                 )
+                msg_cnt += 1
+            # end for
             cursor.close()
 
+            if msg_cnt > 0:
+                logging.info("Fleetbot: There are %d message to be sent!", msg_cnt)
+
+            duplicates = 0
             # filter duplicates because fuck spam pings
             for group in messages_by_group.keys():
                 msgs = messages_by_group[group]
@@ -149,8 +157,12 @@ class MyDBModel:
                 for i in range(0, len(msgs)):
                     if msgs[i]['message'] == last_msg:
                         msgs[i]['forward'] = False
+                        duplicates += 1
 
                     last_msg = msgs[i]['message']
 
+            if duplicates > 0:
+                logging.info("Fleetbot: Found %d duplicates!", duplicates)
+                
             return messages_by_group
         return {}
