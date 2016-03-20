@@ -194,6 +194,31 @@ class ScotchBotCommand:
 
 
 
+class CafeBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!cafe"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in CafeBotCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "<@" + message.author.id + "> hands out coffee!")
+
+
+class CakeBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!cake"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in CakeBotCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "The cake is a lie!")
+
+
+
 class USABotCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
