@@ -67,8 +67,16 @@ class MyBotApp:
                                     config.get('Bot', 'debug_channel_name'),
                                     config.get('Bot', 'auth_website'),
                                     config.get('Discord', 'discordserverid'))
-        client.run(config.get('Discord', 'discorduser'),
-                   config.get('Discord', 'discordpass'))
+        i=0
+        while True:
+            logging.info("Trying to start bot, run %d", i)
+            try:
+                client.run(config.get('Discord', 'discorduser'),
+                           config.get('Discord', 'discordpass'))
+            except discord.ClientException as e:
+                logging.exception("Got ClientException: ")
+            i += 1
+
 
     def connectToDB(self, args, config):
         """ connect to the database as specified in the config file

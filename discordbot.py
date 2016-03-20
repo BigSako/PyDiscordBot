@@ -71,7 +71,7 @@ class MyDiscordBotClient(discord.Client):
     def on_ready(self):
         """Asynchronous event handler for when we are fully ready to interact
         with the server"""
-        logging.info("OnReady: Logged in as %s (id: %d)",
+        logging.info("OnReady: Logged in as %s (id: %s)",
                      self.user.name, self.user.id)
 
         logging.info("Checking which servers we are connected to")
@@ -131,7 +131,7 @@ class MyDiscordBotClient(discord.Client):
     def handle_auth_token(self, author, auth_token):
         """ handles an auth token sent by author """
 
-        logging.info("Verifying auth token '%s'", auth_token)
+        logging.info("Verifying auth token '%s' for user %s", auth_token, str(author.name))
         if self.model.is_auth_code_in_table(auth_token):
             logging.info("Token is valid!")
             # update member_id for auth_code
@@ -140,7 +140,7 @@ class MyDiscordBotClient(discord.Client):
             char_data = self.model.get_discord_members_character_id(str(author.id))
             character_name, corp_name, character_id = char_data
 
-            yield from self.send_message(author, "Hello {}! Your corp is {}!".format(character_name, corp_name))
+            yield from self.send_message(author, "Hello {}! You are now authed, your corp is {}!".format(character_name, corp_name))
             yield from self.send_to_debug_channel("User {} just authed as {} (corp {}, char id {}) ".format(str(author.name), character_name, corp_name, character_id))
 
             # assign roles for this user
@@ -151,11 +151,10 @@ class MyDiscordBotClient(discord.Client):
 
             # get member based on message.author.id
             member = self.currently_online_members[author.id]
-            print(member)
 
             yield from self.add_roles(member, *new_roles)
-
         else:
+            logging.error("Could not find token '%s' in database...", auth_token)
             yield from self.send_message(author, "Sorry, I did not recognize the auth code you sent me!")
             yield from self.send_to_debug_channel("User {} entered auth key {}, but I could not find it in database".format(author.name, auth_token))
 
@@ -287,7 +286,7 @@ class MyDiscordBotClient(discord.Client):
         while True:
             # update list of authed members from database
             self.authed_users = self.model.get_all_authed_members()
-            logging.info("Received %s authed users from database", len(self.authed_users))
+            #logging.info("Received %s authed users from database", len(self.authed_users))
 
             newOnlineMembers = {}
             allOnlineMembers = {}
