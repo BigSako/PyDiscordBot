@@ -51,10 +51,11 @@ class MyDBModel:
             if result['cnt_authed'] == 1 or result['cnt_authed'] == "1":
                 retval = True
             else:
-                print("Auth name not found? cnt_authed=" + str(result['cnt_authed']))
+                logging.error("Auth name not found? cnt_authed=" + str(result['cnt_authed']))
+                logging.error("auth_code='" + auth_code + "'")
             cursor.close()
             return retval
-
+        logging.error("is_auth_code_in_table: outside of where we should be...")
         return False
 
 
@@ -130,6 +131,7 @@ class MyDBModel:
 
                 messages_by_group[group].append(
                     {
+                        'id': row['id'],
                         'from': row['from_character'],
                         'timestamp': row['timestamp'],
                         'message': row['message'],
