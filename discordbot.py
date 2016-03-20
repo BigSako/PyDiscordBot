@@ -301,8 +301,8 @@ class MyDiscordBotClient(discord.Client):
                 if member.id == self.user.id:
                     continue # ship yourself
 
-                if str(member.status) == 'offline':
-                    continue # no need to process offline members for now
+                #if str(member.status) == 'offline':
+                #    continue # no need to process offline members for now
 
                 member_id = str(member.id)
 
