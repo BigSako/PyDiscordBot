@@ -26,6 +26,8 @@ import pymysql
 import pymysql.cursors
 import pymysql.connections
 
+import discord
+
 from  discordbot import MyDiscordBotClient
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
