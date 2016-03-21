@@ -55,23 +55,21 @@ class AbstractBotCommand:
         # extract command name
         logging.info("Found command string '%s'", cmd)
 
+        # see if this command is available
         if cmd in AbstractBotCommand.available_commands:
-            logging.info("Found command in available_commands, dispatching (params=%s)...", params)
-            logging.info("Module = %s", AbstractBotCommand.available_commands[cmd])
-            print(AbstractBotCommand.available_commands)
-            print(AbstractBotCommand.available_commands[cmd].handle_command)
             try:
+                # dispatch command to abstract command
                 yield from AbstractBotCommand.available_commands[cmd].handle_command(message, cmd, params)
             except Exception as e:
-                print ("Unexpected error:", e)
+                logging.exception("Unexpected error while dispatching...")
                 logging.error(traceback.format_exc())
         else:
-            logging.info("Command not found...")
+            logging.info("Command '%s' not found...", cmd)
 
 
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
-        logging.info("Abstract method was called... f")
+        logging.error("Abstract method was called... f")
         return
 
 
@@ -228,4 +226,4 @@ class USABotCommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         logging.info("in USABotCommand.handle_command()")
-        yield from self.client.send_message(message.channel, "<@" + message.author.id + "> invites everybody to drink a scotch!")
+        yield from self.client.send_message(message.channel, "USA! USA! U S A! U S A! :us:")
