@@ -266,6 +266,7 @@ class MyDiscordBotClient(discord.Client):
                 yield from self.add_roles(member, *roles_to_add)
         except:
             logging.info("Caught an exception in verify_member_roles... Probably rate limited...")
+            logging.info(sys.exc_info()[0])
             yield from asyncio.sleep(2)
 
 
@@ -290,10 +291,13 @@ class MyDiscordBotClient(discord.Client):
                         if msgs[i]['forward']:
                             new_msg = "@everyone " + msgs[i]['message']
                             logging.info("Fleetbot(%s): %s", group, new_msg)
-                            try:
-                                yield from self.send_to_fleetbot_channel(group, new_msg)
-                            except:
-                                logging.error("Caught an exception when forwarding: " +  sys.exc_info()[0])
+                            while True:
+                                try:
+                                    yield from self.send_to_fleetbot_channel(group, new_msg)
+                                    break
+                                except:
+                                    logging.error("Caught an exception when forwarding: " +  sys.exc_info()[0])
+                                    yield from asyncio.sleep(2) # wait 1 second
                 else:
                     logging.info("Error: Could not find group with name '%s' to forward ...", group)
 
