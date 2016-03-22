@@ -9,6 +9,7 @@ from datetime import datetime
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 import discord
+import websockets
 from model import MyDBModel
 
 import bot_commands
