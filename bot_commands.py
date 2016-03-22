@@ -253,8 +253,18 @@ class ModifyPingTimespanCommand:
     def handle_command(self, message, cmd, params):
         logging.info("in ModifyPingTimespanCommand.handle_command()")
         if params == "" or not " " in params:
+            start_time = int(self.client.authed_users[message.author.id]['start_hour'])
+            stop_time = int(self.client.authed_users[message.author.id]['stop_hour'])
+
+            ping_timeframe = ""
+            if start_time == 0 and stop_time == 0:
+                ping_timeframe = "24h a day"
+            else:
+                ping_timeframe = "between " + str(start_time) + ":00 and " + str(stop_time) + ":00 UTC (EVE TIME)"
+
+
             yield from self.client.send_message(message.channel,
-                                                "<@" + message.author.id + "> Please tell me the timespan you would like to be pinged from in hours (UTC/EVE Time). Example: ``!pingme 8 22`` would send pings between 08:00 and 22:00. ``!pingme 0 24`` will reset it to the full day.")
+                                                "<@" + message.author.id + "> Please tell me the timespan you would like to be pinged from in hours (UTC/EVE Time). Example: ``!pingme 8 22`` would send pings between 08:00 and 22:00. ``!pingme 0 24`` will reset it to the full day. At the moment you are pinged " + ping_timeframe + "!")
         else: # parse params: should be something like {int1} {int2}
             data = params.split(" ")
             start_hour = int(data[0])
