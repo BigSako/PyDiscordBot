@@ -21,6 +21,7 @@ import sys, os
 import string
 import asyncio
 import logging
+import time
 
 import pymysql
 import pymysql.cursors
@@ -65,19 +66,24 @@ class MyBotApp:
 
         logging.info("Starting bot now (stop with CTRL-C)...")
 
-        client = MyDiscordBotClient(self.db,
-                                    config.get('Bot', 'debug_channel_name'),
-                                    config.get('Bot', 'auth_website'),
-                                    config.get('Discord', 'discordserverid'))
+
         i=0
         while True:
-            logging.info("Trying to start bot, run %d", i)
+            logging.info("Trying to connect bot (run %d)", i)
             try:
+                client = MyDiscordBotClient(self.db,
+                                            config.get('Bot', 'debug_channel_name'),
+                                            config.get('Bot', 'auth_website'),
+                                            config.get('Discord', 'discordserverid'))
                 client.run(config.get('Discord', 'discorduser'),
                            config.get('Discord', 'discordpass'))
-            except discord.ClientException as e:
-                logging.exception("Got ClientException: ")
+            except (discord.ClientException, websockets.exceptions.InvalidState) as e:
+                logging.exception("Got Exception: ")
+
+            logging.info("Bot crashed? Not sure... waiting 30 seconds before doing anything else")
+            time.sleep(30) # wait 30 seconds, then reconnect
             i += 1
+
 
 
     def connectToDB(self, args, config):
