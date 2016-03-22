@@ -4,6 +4,7 @@ import asyncio
 import logging
 import datetime
 import random
+from datetime import datetime
 
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
@@ -232,10 +233,30 @@ class MyDiscordBotClient(discord.Client):
             # which roles should this member have
             should_have_roles = self.model.get_roles_for_member(member_id)
 
-            # do time dep roles
-            for role in should_have_roles:
-                if role in self.timedep_group_assignment:
-                    should_have_roles.append(self.timedep_group_assignment[role])
+            ping_start_hour = self.authed_users[member_id]['start_hour']
+            ping_stop_hour = self.authed_users[member_id]['stop_hour']
+
+            cur_hour = datetime.utcnow().hour
+
+            do_time_dep_roles = False
+
+            # case 0: user does not care about any time dependency
+            if ping_start_hour != 0 or ping_stop_hour != 0:
+                do_time_dep_roles = True # always assign
+
+            # case 1: ping_start_hour < ping_stop_hour, e.g., between 8 and 22 hours
+            if ping_start_hour < ping_stop_hour and cur_hour >= ping_start_hour and cur_hour < ping_stop_hour:
+                do_time_dep_roles = True
+
+            # case 2: ping_start_hour > ping_stop_hour, e.g., between 16 and 4 hours
+            if ping_start_hour > ping_stop_hour and (cur_hour >= ping_start_hour or cur_hour < ping_stop_hour):
+                do_time_dep_roles = True
+
+
+            if do_time_dep_roles:
+                for role in should_have_roles:
+                    if role in self.timedep_group_assignment:
+                        should_have_roles.append(self.timedep_group_assignment[role])
 
             # check if there are any roles that we need to remove
             roles_to_remove = []
@@ -264,9 +285,10 @@ class MyDiscordBotClient(discord.Client):
 
             if len(roles_to_add) > 0:
                 yield from self.add_roles(member, *roles_to_add)
+                yield from asyncio.sleep(0.2)
         except:
             logging.info("Caught an exception in verify_member_roles... Probably rate limited...")
-            logging.info(sys.exc_info()[0])
+            logging.info(str(sys.exc_info()[0]))
             yield from asyncio.sleep(2)
 
 
@@ -298,9 +320,9 @@ class MyDiscordBotClient(discord.Client):
                                     yield from self.send_to_fleetbot_channel(group, new_msg)
                                     break
                                 except:
-                                    logging.error("Caught an exception when forwarding: " +  sys.exc_info()[0])
-                                    logging.info("trying to send message again in 2 seconds...")
-                                    yield from asyncio.sleep(2) # wait 1 second
+                                    logging.error("Caught exception while forwarding: " + str(sys.exc_info()[0]))
+                                    logging.info("trying to send message again in 5 seconds...")
+                                    yield from asyncio.sleep(5) # wait 1 second
                 else:
                     logging.info("Error: Could not find group with name '%s' to forward ...", group)
 
@@ -372,9 +394,20 @@ class MyDiscordBotClient(discord.Client):
                         logging.info("A new user connected to the server: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))
                         newOnlineMembers[member_id] = member
 
+
                         # this user just got online and is not authed! ask this user to auth
-                        yield from self.send_message(member,
-                                                     """Hi! You need to authenticate to be able to use this Discord server. Please go to {} to obtain your authorization token (starting with auth=), and then just message the full token (including auth=) to me!""".format(self.auth_website))
+                        retry_cnt = 0
+                        while retry_cnt < 4:
+                            try:
+                                retry_cnt += 1
+                                yield from self.send_message(member,
+                                                         """Hi! You need to authenticate to be able to use this Discord server. Please go to {} to obtain your authorization token (starting with auth=), and then just message the full token (including auth=) to me!""".format(self.auth_website))
+                                break
+                            except:
+                                logging.info("Got an error while sending message to new user: " + sys.exc_info()[0])
+                                logging.info("trying again in 5 seconds")
+                                yield from asyncio.sleep(5)
+
                         yield from self.send_to_debug_channel("Non authed user {} just connected, asking user to auth...".format(member.name))
                     else:
                         # this user has been online for some time, no need to ask to auth again (I guess)
