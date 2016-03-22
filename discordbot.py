@@ -228,42 +228,45 @@ class MyDiscordBotClient(discord.Client):
     @asyncio.coroutine
     def verify_member_roles(self, member, member_id):
         """ checks the roles of a single member, and adds or removes them as needed """
+        try:
+            # which roles should this member have
+            should_have_roles = self.model.get_roles_for_member(member_id)
 
-        # which roles should this member have
-        should_have_roles = self.model.get_roles_for_member(member_id)
+            # do time dep roles
+            for role in should_have_roles:
+                if role in self.timedep_group_assignment:
+                    should_have_roles.append(self.timedep_group_assignment[role])
 
-        # do time dep roles
-        for role in should_have_roles:
-            if role in self.timedep_group_assignment:
-                should_have_roles.append(self.timedep_group_assignment[role])
+            # check if there are any roles that we need to remove
+            roles_to_remove = []
 
-        # check if there are any roles that we need to remove
-        roles_to_remove = []
+            for role in member.roles:
+                # needs to keep the everyone group
+                if role == self.everyone_group:
+                    continue
+                if str(role.id) not in should_have_roles:
+                    logging.info("Member {} has role {} (ID: {}), but should not have it... removing".format(member.name, role.name, role.id))
+                    roles_to_remove.append(role)
+                else:
+                    should_have_roles.remove(role.id)
 
-        for role in member.roles:
-            # needs to keep the everyone group
-            if role == self.everyone_group:
-                continue
-            if str(role.id) not in should_have_roles:
-                logging.info("Member {} has role {} (ID: {}), but should not have it... removing".format(member.name, role.name, role.id))
-                roles_to_remove.append(role)
-            else:
-                should_have_roles.remove(role.id)
-
-        # remove those roles if neccessary
-        if len(roles_to_remove) > 0:
-            yield from self.remove_roles(member, *roles_to_remove)
+            # remove those roles if neccessary
+            if len(roles_to_remove) > 0:
+                yield from self.remove_roles(member, *roles_to_remove)
 
 
-        roles_to_add = []
-        # anything left in should_have_roles should be assigned
-        for role_id in should_have_roles:
-            role = self.roles[role_id]
-            logging.info("Member {} is missing role {} (ID: {}), adding it now".format(member.name, role.name, role.id))
-            roles_to_add.append(role)
+            roles_to_add = []
+            # anything left in should_have_roles should be assigned
+            for role_id in should_have_roles:
+                role = self.roles[role_id]
+                logging.info("Member {} is missing role {} (ID: {}), adding it now".format(member.name, role.name, role.id))
+                roles_to_add.append(role)
 
-        if len(roles_to_add) > 0:
-            yield from self.add_roles(member, *roles_to_add)
+            if len(roles_to_add) > 0:
+                yield from self.add_roles(member, *roles_to_add)
+        except:
+            logging.info("Caught an exception in verify_member_roles... Probably rate limited...")
+            yield from asyncio.sleep(2)
 
 
     def forward_fleetbot_messages(self):
@@ -287,7 +290,10 @@ class MyDiscordBotClient(discord.Client):
                         if msgs[i]['forward']:
                             new_msg = "@everyone " + msgs[i]['message']
                             logging.info("Fleetbot(%s): %s", group, new_msg)
-                            yield from self.send_to_fleetbot_channel(group, new_msg)
+                            try:
+                                yield from self.send_to_fleetbot_channel(group, new_msg)
+                            except:
+                                logging.error("Caught an exception when forwarding: " +  sys.exc_info()[0])
                 else:
                     logging.info("Error: Could not find group with name '%s' to forward ...", group)
 
