@@ -2,6 +2,7 @@
 
 import logging
 import asyncio
+from datetime import datetime
 
 from model import MyDBModel
 import random
@@ -115,6 +116,18 @@ class WhoamiBotCommand:
             yield from self.client.send_message(message.channel, "<@" + message.author.id + "> is also known as " + str(char_data))
         else:
             yield from self.client.send_message(message.channel, "<@" + str(message.author.id) + "> I am sorry, I do not know you!")
+
+
+class EveTimeCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!evetime"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in EveTimeCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "Current EVE Time " + str(datetime.utcnow()))
 
 
 class UptimeBotCommand:
