@@ -1,6 +1,12 @@
 PyMySQL==0.7.2
 aiohttp==0.21.4
 argumentparser==1.2.1
+astroid==1.4.4
 chardet==2.3.0
+colorama==0.3.7
 discord.py==0.10.0-alpha
+lazy-object-proxy==1.2.1
+pylint==1.5.4
+six==1.10.0
 websockets==2.7
+wrapt==1.10.6

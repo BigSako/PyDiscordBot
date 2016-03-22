@@ -19,6 +19,7 @@ import importlib
 fleetbot_ncdot_channel_name = "fleetbot_ncdot"
 fleetbot_sm3ll_channel_name = "fleetbot_sm3ll"
 fleetbot_supers_channel_name = "fleetbot_supers"
+fleetbot_gloryholes_channel_name = "fleetbot_gloryholes"
 
 
 cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
@@ -115,6 +116,9 @@ class MyDiscordBotClient(discord.Client):
             elif channel.name == fleetbot_sm3ll_channel_name:
                 logging.info("Found fleetbot sm3ll channel '%s'", fleetbot_sm3ll_channel_name)
                 self.group_channels['BC/BURNING_NAPALM'] = channel
+            elif channel.name == fleetbot_gloryholes_channel_name:
+                logging.info("Found fleetbot glory holes channel '%s'", fleetbot_gloryholes_channel_name)
+                self.group_channels['BC/GLORYHOLES'] = channel
 
     def update_roles(self, server):
         """ Update the list of roles """

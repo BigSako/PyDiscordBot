@@ -1,3 +1,4 @@
 /local.cfg
-/__pycache__/discordbot.cpython-34.pyc
-/__pycache__/model.cpython-34.pyc
+/__pycache__
+/virtualenv
+/discord.lock
