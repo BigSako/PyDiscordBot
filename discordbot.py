@@ -291,12 +291,15 @@ class MyDiscordBotClient(discord.Client):
                         if msgs[i]['forward']:
                             new_msg = "@everyone " + msgs[i]['message']
                             logging.info("Fleetbot(%s): %s", group, new_msg)
-                            while True:
+                            cnt_tries = 0
+                            while cnt_tries < 4:
                                 try:
+                                    cnt_tries += 1
                                     yield from self.send_to_fleetbot_channel(group, new_msg)
                                     break
                                 except:
                                     logging.error("Caught an exception when forwarding: " +  sys.exc_info()[0])
+                                    logging.info("trying to send message again in 2 seconds...")
                                     yield from asyncio.sleep(2) # wait 1 second
                 else:
                     logging.info("Error: Could not find group with name '%s' to forward ...", group)
