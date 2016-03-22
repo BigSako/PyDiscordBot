@@ -21,9 +21,9 @@ Python requirements: see [requirements.txt](requirements.txt)
 
 ```
 git clone https://github.com/BigSako/PyDiscordBot.git
-virtualenv -python python3.4 py34env
-source py34env/bin/activate
 cd PyDiscordBot
+virtualenv -python python3.4 virtualenv
+source virtualenv/bin/activate
 pip install git+https://github.com/Rapptz/discord.py@async
 pip install -r requirements.txt
 ```
