@@ -227,3 +227,24 @@ class USABotCommand:
     def handle_command(self, message, cmd, params):
         logging.info("in USABotCommand.handle_command()")
         yield from self.client.send_message(message.channel, "USA! USA! U S A! U S A! :us:")
+
+
+
+class ModifyPingTimespanCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!pingme"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in ModifyPingTimespanCommand.handle_command()")
+        if params == "" or not " " in params:
+            yield from self.client.send_message(message.channel,
+                                                "<@" + message.author.id + "> Please tell me the timespan you would like to be pinged from in hours (UTC/EVE Time). Example: ``!pingme 8 22`` would send pings between 08:00 and 22:00. ``!pingme 0 24`` will reset it to the full day.")
+        else: # parse params: should be something like {int1} {int2}
+            data = params.split(" ")
+            start_hour = int(data[0])
+            stop_hour = int(data[1])
+            yield from self.client.send_message(message.channel,
+                                                "<@" + message.author.id + "> Okay, I will ping you between " + str(start_hour) + ":00 and " + str(stop_hour) + ":00 UTC (EVE Time)")
