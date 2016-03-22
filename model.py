@@ -82,7 +82,8 @@ class MyDBModel:
             cursor.execute(sql)
             self.db.commit()
 
-            sql = """SELECT user_id, discord_member_id, discord_auth_token
+            sql = """SELECT user_id, discord_member_id, discord_auth_token,
+            ping_start_hour, ping_stop_hour
             FROM discord_auth
             WHERE discord_auth_token <> ''
             AND discord_member_id  IS NOT NULL; """
@@ -94,12 +95,25 @@ class MyDBModel:
             for row in cursor:
                 authed_users[str(row['discord_member_id'])] = {
                     'user_id': row['user_id'],
-                    'auth_token': row['discord_auth_token']
+                    'auth_token': row['discord_auth_token'],
+                    'start_hour': row['ping_start_hour'],
+                    'stop_hour': row['ping_stop_hour']
                 }
             cursor.close()
 
             return authed_users
         return {}
+
+    def update_ping_start_stop_hour(self, discord_member_id, start_hour, stop_hour):
+        """ updates discord_auth.ping_start_hour and ping_stop_hour """
+        with self.db.cursor() as cursor:
+            sql = """UPDATE discord_auth SET ping_start_hour = %s, ping_stop_hour = %s
+            WHERE discord_member_id = %s"""
+
+            cursor.execute(sql, {str(start_hour), str(stop_hour), str(discord_member_id),})
+            cursor.close()
+
+            self.db.commit()
 
     def get_fleetbot_max_message_id(self):
         """ returns the last max message id from fleetbot messages """
@@ -163,6 +177,6 @@ class MyDBModel:
 
             if duplicates > 0:
                 logging.info("Fleetbot: Found %d duplicates!", duplicates)
-                
+
             return messages_by_group
         return {}

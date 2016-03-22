@@ -246,5 +246,17 @@ class ModifyPingTimespanCommand:
             data = params.split(" ")
             start_hour = int(data[0])
             stop_hour = int(data[1])
+
+            if start_hour == 0 and stop_hour == 24:
+                stop_hour = 0
+
+            if start_hour > 24:
+                start_hour = 24
+
+            if stop_hour > 24:
+                stop_hour = 24
+
+            self.model.update_ping_start_stop_hour(message.author.id, start_hour, stop_hour)
+
             yield from self.client.send_message(message.channel,
                                                 "<@" + message.author.id + "> Okay, I will ping you between " + str(start_hour) + ":00 and " + str(stop_hour) + ":00 UTC (EVE Time)")
