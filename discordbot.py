@@ -100,7 +100,7 @@ class MyDiscordBotClient(discord.Client):
         self.update_roles(main_server)
 
         # Send a message to a destination
-        yield from self.send_to_debug_channel("I am back {}!".format(str(datetime.datetime.now())))
+        yield from self.send_to_debug_channel("I am back {}!".format(str(datetime.now())))
 
         AbstractBotCommand.import_bot_commands(self.model, self)
 
