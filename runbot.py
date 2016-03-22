@@ -22,6 +22,8 @@ import string
 import asyncio
 import logging
 import time
+import websockets.exceptions
+
 
 import pymysql
 import pymysql.cursors
