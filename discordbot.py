@@ -21,7 +21,6 @@ fleetbot_sm3ll_channel_name = "fleetbot_sm3ll"
 fleetbot_supers_channel_name = "fleetbot_supers"
 fleetbot_gloryholes_channel_name = "fleetbot_gloryholes"
 
-
 cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
                    "Have two :cookie:", "Sorry, I am out of cookies! Oh wait, found one! :cookie:",
                    "C is for :cookie:", "https://www.youtube.com/watch?v=Ye8mB6VsUHw",

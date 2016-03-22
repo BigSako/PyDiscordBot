@@ -110,7 +110,7 @@ class MyDBModel:
             sql = """UPDATE discord_auth SET ping_start_hour = %s, ping_stop_hour = %s
             WHERE discord_member_id = %s"""
 
-            cursor.execute(sql, {str(start_hour), str(stop_hour), str(discord_member_id),})
+            cursor.execute(sql, (str(start_hour), str(stop_hour), str(discord_member_id),))
             cursor.close()
 
             self.db.commit()
@@ -134,7 +134,7 @@ class MyDBModel:
         with self.db.cursor() as cursor:
             sql = """SELECT id, from_character, `timestamp`, message, groupname
             FROM irc_ping_history WHERE id > %s ORDER BY `timestamp` ASC """
-            cursor.execute(sql, {str(last_id),})
+            cursor.execute(sql, (str(last_id),))
 
             messages_by_group = {}
 
