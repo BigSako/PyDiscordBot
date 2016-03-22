@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import datetime
 import random
 from datetime import datetime
 
@@ -63,7 +62,7 @@ class MyDiscordBotClient(discord.Client):
         self.main_server_id = main_server_id
 
         # store the time when the bot started
-        self.start_time = datetime.datetime.now()
+        self.start_time = datetime.now()
 
         self.timedep_group_assignment = {}
 
