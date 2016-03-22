@@ -74,7 +74,8 @@ class MyBotApp:
                 client = MyDiscordBotClient(self.db,
                                             config.get('Bot', 'debug_channel_name'),
                                             config.get('Bot', 'auth_website'),
-                                            config.get('Discord', 'discordserverid'))
+                                            config.get('Discord', 'discordserverid'),
+                                            config.get('Bot', 'time_dependent_groups'))
                 client.run(config.get('Discord', 'discorduser'),
                            config.get('Discord', 'discordpass'))
             except (discord.ClientException, websockets.exceptions.InvalidState) as e:

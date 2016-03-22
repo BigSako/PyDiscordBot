@@ -40,7 +40,7 @@ cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
 class MyDiscordBotClient(discord.Client):
     """ Creates a discord client application based on discord.Client, which
     handles authentication with a pre-defined EvE Online auth database """
-    def __init__(self, db, debug_channel_name, auth_website, main_server_id):
+    def __init__(self, db, debug_channel_name, auth_website, main_server_id, time_dep_groups):
         self.db = db # the database
         self.debug_channel_name = debug_channel_name
         self.auth_website = auth_website
@@ -63,6 +63,17 @@ class MyDiscordBotClient(discord.Client):
 
         # store the time when the bot started
         self.start_time = datetime.datetime.now()
+
+        self.timedep_group_assignment = {}
+
+        # parse time dependent groups
+        assignments = time_dep_groups.split(",")
+        for ass in assignments:
+            tmpgroups = ass.split('->')
+            groupid1 = tmpgroups[0]
+            groupid2 = tmpgroups[1]
+            if groupid2 != "0":
+                self.timedep_group_assignment[groupid1] = groupid2
 
         # call super class init
         super(MyDiscordBotClient, self).__init__()
@@ -220,6 +231,11 @@ class MyDiscordBotClient(discord.Client):
 
         # which roles should this member have
         should_have_roles = self.model.get_roles_for_member(member_id)
+
+        # do time dep roles
+        for role in should_have_roles:
+            if role in self.timedep_group_assignment:
+                should_have_roles.append(self.timedep_group_assignment[role])
 
         # check if there are any roles that we need to remove
         roles_to_remove = []
