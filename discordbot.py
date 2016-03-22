@@ -1,5 +1,6 @@
 """A simple discord.py program to log in and receive and post messages"""
 
+import sys
 import asyncio
 import logging
 import random
