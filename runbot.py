@@ -70,7 +70,8 @@ class MyBotApp:
 
 
         i=0
-        while True:
+        stop = False
+        while not stop:
             logging.info("Trying to connect bot (run %d)", i)
             client = None
             try:
@@ -80,9 +81,15 @@ class MyBotApp:
                                             config.get('Discord', 'discordserverid'),
                                             config.get('Bot', 'time_dependent_groups'))
                 logging.info("Calling client.run()")
-                client.run(config.get('Discord', 'discorduser'),
-                           config.get('Discord', 'discordpass'))
+                # use run_until_complete manually, as described in client.run()
+                client.loop.run_until_complete(client.start(config.get('Discord', 'discorduser'),
+                           config.get('Discord', 'discordpass')))
 
+                logging.info("client.run() finished!")
+            except KeyboardInterrupt:
+                logging.info("Loop interruped with CTRl-C, exiting...")
+                client.loop.run_until_complete(client.logout())
+                stop = True
             except (discord.ClientException, websockets.exceptions.InvalidState, RuntimeError) as e:
                 logging.info("Got exception while MyDiscordBotClient.run(): " + str(e))
                 logging.error(e, exc_info=True)
@@ -91,12 +98,13 @@ class MyBotApp:
                 logging.exception("Exception info")
             finally: # close client connection
                 if client:
-                    client.close()
+                    client.loop.close()
 
-            logging.info("Bot crashed? Not sure... waiting 60 seconds before doing anything else")
-            time.sleep(60) # wait 30 seconds, then reconnect
-            i += 1
-
+            if not stop:
+                logging.info("Bot crashed? Not sure... waiting 60 seconds before doing anything else")
+                time.sleep(60) # wait 30 seconds, then reconnect
+                i += 1
+        logging.info("Gracefully shutting down...")
 
 
     def connectToDB(self, args, config):
@@ -163,6 +171,6 @@ if __name__ == "__main__":
         except:
             logging.info("Unhandled Exception got out...")
             logging.error(sys.exc_info()[0])
-            
+
         print("Removing discord.lock")
         os.remove("discord.lock")
