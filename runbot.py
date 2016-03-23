@@ -72,19 +72,29 @@ class MyBotApp:
         i=0
         while True:
             logging.info("Trying to connect bot (run %d)", i)
+            client = None
             try:
                 client = MyDiscordBotClient(self.db,
                                             config.get('Bot', 'debug_channel_name'),
                                             config.get('Bot', 'auth_website'),
                                             config.get('Discord', 'discordserverid'),
                                             config.get('Bot', 'time_dependent_groups'))
+                logging.info("Calling client.run()")
                 client.run(config.get('Discord', 'discorduser'),
                            config.get('Discord', 'discordpass'))
-            except (discord.ClientException, websockets.exceptions.InvalidState) as e:
-                logging.exception("Got Exception: ")
 
-            logging.info("Bot crashed? Not sure... waiting 30 seconds before doing anything else")
-            time.sleep(30) # wait 30 seconds, then reconnect
+            except (discord.ClientException, websockets.exceptions.InvalidState, RuntimeError) as e:
+                logging.info("Got exception while MyDiscordBotClient.run(): " + str(e))
+                logging.error(e, exc_info=True)
+            except:
+                logging.info("Got an unhandled exception while MyDiscordBotClient.run()")
+                logging.exception("Exception info")
+            finally: # close client connection
+                if client:
+                    client.close()
+
+            logging.info("Bot crashed? Not sure... waiting 60 seconds before doing anything else")
+            time.sleep(60) # wait 30 seconds, then reconnect
             i += 1
 
 
@@ -148,6 +158,11 @@ if __name__ == "__main__":
         fp = open("discord.lock", "w")
         fp.write("running")
         fp.close()
-        app = MyBotApp()
-
+        try:
+            app = MyBotApp()
+        except:
+            logging.info("Unhandled Exception got out...")
+            logging.error(sys.exc_info()[0])
+            
+        print("Removing discord.lock")
         os.remove("discord.lock")
