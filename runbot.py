@@ -79,7 +79,8 @@ class MyBotApp:
                                             config.get('Bot', 'debug_channel_name'),
                                             config.get('Bot', 'auth_website'),
                                             config.get('Discord', 'discordserverid'),
-                                            config.get('Bot', 'time_dependent_groups'))
+                                            config.get('Bot', 'time_dependent_groups'),
+                                            config.get('Bot', 'fleetbot_channels'))
                 logging.info("Calling client.run()")
                 # use run_until_complete manually, as described in client.run()
                 client.loop.run_until_complete(client.start(config.get('Discord', 'discorduser'),

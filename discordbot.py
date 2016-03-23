@@ -16,11 +16,6 @@ from bot_commands import AbstractBotCommand
 
 import importlib
 
-# TODO: Remove these static names and put them into a config
-fleetbot_ncdot_channel_name = "fleetbot_ncdot"
-fleetbot_sm3ll_channel_name = "fleetbot_sm3ll"
-fleetbot_supers_channel_name = "fleetbot_supers"
-fleetbot_gloryholes_channel_name = "fleetbot_gloryholes"
 
 cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
                    "Have two :cookie:", "Sorry, I am out of cookies! Oh wait, found one! :cookie:",
@@ -41,7 +36,8 @@ cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
 class MyDiscordBotClient(discord.Client):
     """ Creates a discord client application based on discord.Client, which
     handles authentication with a pre-defined EvE Online auth database """
-    def __init__(self, db, debug_channel_name, auth_website, main_server_id, time_dep_groups):
+    def __init__(self, db, debug_channel_name, auth_website, main_server_id,
+                 time_dep_groups, fleetbot_channels):
         self.db = db # the database
         self.debug_channel_name = debug_channel_name
         self.auth_website = auth_website
@@ -66,18 +62,32 @@ class MyDiscordBotClient(discord.Client):
         self.start_time = datetime.now()
 
         self.timedep_group_assignment = {}
+        self.fleetbot_channels = {}
 
         self.verify_users_loop = None
         self.forward_fleetbot_loop = None
 
-        # parse time dependent groups
-        assignments = time_dep_groups.split(",")
-        for ass in assignments:
-            tmpgroups = ass.split('->')
-            groupid1 = tmpgroups[0]
-            groupid2 = tmpgroups[1]
-            if groupid2 != "0":
-                self.timedep_group_assignment[groupid1] = groupid2
+        if time_dep_groups != "":
+            logging.info("Parsing time_dep_groups=" + time_dep_groups)
+            # parse time dependent groups
+            assignments = time_dep_groups.split(",")
+            for ass in assignments:
+                tmpgroups = ass.split('->')
+                groupid1 = tmpgroups[0]
+                groupid2 = tmpgroups[1]
+                if groupid2 != "0":
+                    self.timedep_group_assignment[groupid1] = groupid2
+
+        if fleetbot_channels != "":
+            logging.info("Parsing fleetbot_channels=" + fleetbot_channels)
+            assignments = fleetbot_channels.split(",")
+            for ass in assignments:
+                tmpchannels = ass.split('->')
+                # fleetbot_ncdot->BC/NORTHERN_COALITION
+                channel_name = tmpchannels[0]
+                broadcast_name = tmpchannels[1]
+                self.fleetbot_channels[channel_name] = broadcast_name
+
 
         # call super class init
         super(MyDiscordBotClient, self).__init__()
@@ -124,24 +134,22 @@ class MyDiscordBotClient(discord.Client):
             self.forward_fleetbot_loop.cancel()
 
 
+
     def update_channels(self, server):
         """ Updates the list of channels """
         logging.info("Updating channel list")
 
         for channel in server.channels:
-            print(' ', channel.server, channel.name, channel.type)
+            logging.info("Found channel " + str(channel.server) + "," + str(channel.name) + "," + str(channel.type))
+
             if channel.name == self.debug_channel_name:
                 logging.info("Found debug channel '%s'", self.debug_channel_name)
                 self.debug_channel = channel
-            elif channel.name == fleetbot_ncdot_channel_name:
-                logging.info("Found fleetbot ncdot channel '%s'", fleetbot_ncdot_channel_name)
-                self.group_channels['BC/NORTHERN_COALITION'] = channel
-            elif channel.name == fleetbot_sm3ll_channel_name:
-                logging.info("Found fleetbot sm3ll channel '%s'", fleetbot_sm3ll_channel_name)
-                self.group_channels['BC/BURNING_NAPALM'] = channel
-            elif channel.name == fleetbot_gloryholes_channel_name:
-                logging.info("Found fleetbot glory holes channel '%s'", fleetbot_gloryholes_channel_name)
-                self.group_channels['BC/GLORYHOLES'] = channel
+            elif channel.name in self.fleetbot_channels.keys():
+                bckey = self.fleetbot_channels[channel.name]
+                logging.info("Found Fleetbot Channel '%s', assigning to broadcast key '%s'", channel.name, bckey)
+                self.group_channels[bckey] = channel
+
 
     def update_roles(self, server):
         """ Update the list of roles """
