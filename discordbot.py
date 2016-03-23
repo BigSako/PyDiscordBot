@@ -122,7 +122,8 @@ class MyDiscordBotClient(discord.Client):
         logging.info("starting async loops...")
         loop = asyncio.get_event_loop()
         self.verify_users_loop = asyncio.async(self.verify_users(main_server))
-        self.forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
+        if len(self.fleetbot_channels) > 0:
+            self.forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
 
     def stop_additional_loops(self):
         """ stops verify users loop and forward fleetbot loop """
