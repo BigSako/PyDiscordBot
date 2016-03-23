@@ -67,6 +67,9 @@ class MyDiscordBotClient(discord.Client):
 
         self.timedep_group_assignment = {}
 
+        self.verify_users_loop = None
+        self.forward_fleetbot_loop = None
+
         # parse time dependent groups
         assignments = time_dep_groups.split(",")
         for ass in assignments:
@@ -108,8 +111,17 @@ class MyDiscordBotClient(discord.Client):
         # verify users, run this until the end
         logging.info("starting async loops...")
         loop = asyncio.get_event_loop()
-        verify_users_loop = asyncio.async(self.verify_users(main_server))
-        forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
+        self.verify_users_loop = asyncio.async(self.verify_users(main_server))
+        self.forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
+
+    def stop_additional_loops(self):
+        """ stops verify users loop and forward fleetbot loop """
+        if self.verify_users_loop:
+            logging.info("stopping verify user loop")
+            self.verify_users_loop.cancel()
+        if self.forward_fleetbot_loop:
+            logging.info("stopping forward fleetbot loop")
+            self.forward_fleetbot_loop.cancel()
 
 
     def update_channels(self, server):

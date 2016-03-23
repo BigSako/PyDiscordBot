@@ -98,6 +98,7 @@ class MyBotApp:
                 logging.exception("Exception info")
             finally: # close client connection
                 if client:
+                    client.stop_additional_loops()
                     client.loop.close()
 
             if not stop:
