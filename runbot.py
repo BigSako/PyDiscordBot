@@ -68,7 +68,6 @@ class MyBotApp:
 
         logging.info("Starting bot now (stop with CTRL-C)...")
 
-
         i=0
         stop = False
         while not stop:
@@ -86,9 +85,13 @@ class MyBotApp:
                 client.loop.run_until_complete(client.start(config.get('Discord', 'discorduser'),
                            config.get('Discord', 'discordpass')))
 
-                logging.info("client.run() finished!")
+                logging.info("client.run() finished! Trying to stop additional loops")
+                client.stop_additional_loops()
+
+                # in case we are continuing: get a new event loop
+                client.loop = asyncio.new_event_loop()
             except KeyboardInterrupt:
-                logging.info("Loop interruped with CTRl-C, exiting...")
+                logging.info("Loop interruped with CTRL-C, exiting...")
                 client.loop.run_until_complete(client.logout())
                 stop = True
             except (discord.ClientException, websockets.exceptions.InvalidState, RuntimeError) as e:
@@ -98,6 +101,7 @@ class MyBotApp:
                 logging.info("Got an unhandled exception while MyDiscordBotClient.run()")
                 logging.exception("Exception info")
             finally: # close client connection
+                logging.info("In finally: stopping loop etc...")
                 if client:
                     client.stop_additional_loops()
                     client.loop.close()
