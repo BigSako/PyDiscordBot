@@ -302,9 +302,12 @@ class MyDiscordBotClient(discord.Client):
             roles_to_add = []
             # anything left in should_have_roles should be assigned
             for role_id in should_have_roles:
-                role = self.roles[role_id]
-                logging.info("Member {} is missing role {} (ID: {}), adding it now".format(member.name, role.name, role.id))
-                roles_to_add.append(role)
+                if role_id in self.roles:
+                    role = self.roles[role_id]
+                    logging.info("Member {} is missing role {} (ID: {}), adding it now".format(member.name, role.name, role.id))
+                    roles_to_add.append(role)
+                else:
+                    logging.error("Member %s is missing role %s, tried to add it but I dont know that role...", member.name, role_id)
 
             if len(roles_to_add) > 0:
                 yield from self.add_roles(member, *roles_to_add)
