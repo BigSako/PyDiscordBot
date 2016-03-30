@@ -10,6 +10,19 @@ class MyDBModel:
     def __init__(self, db):
         self.db = db # the database
 
+    def check_db_connection(self):
+        sq = "SELECT NOW()"
+        with self.db.cursor() as cursor:
+            try:
+                cursor.execute( sq )
+            except pymysql.Error as e:
+                if e.errno == 2006:
+                    logging.error("Database connection failed, trying to reconnect")
+                    return self.db.connect()
+                else:
+                    logging.error("Database connection failed... could not connect to database...")
+                    return False
+
     def set_discord_member_id_for_auth_code(self, auth_code, member_id):
         """ establish relation ship between discord member and auth token"""
         logging.debug("set_discord_member_id_for_auth_code({}, {})". format(auth_code, member_id))
@@ -76,6 +89,8 @@ class MyDBModel:
 
     def get_all_authed_members(self):
         """ returns a list of all authed members as dictionaries """
+        self.check_db_connection()
+
         with self.db.cursor() as cursor:
             # first, delete all "pending auth users"
             sql = """DELETE FROM discord_auth WHERE discord_auth_token = ''"""
