@@ -5,6 +5,7 @@ import asyncio
 import logging
 import random
 from datetime import datetime
+import traceback
 
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
@@ -309,8 +310,10 @@ class MyDiscordBotClient(discord.Client):
                 yield from self.add_roles(member, *roles_to_add)
                 yield from asyncio.sleep(0.2)
         except:
-            logging.info("Caught an exception in verify_member_roles... Probably rate limited...")
+            logging.info("Caught an exception in verify_member_roles... Probably rate limited?")
+            tb = traceback.format_exc()
             logging.info(str(sys.exc_info()[0]))
+            logging.info(tb)
             yield from asyncio.sleep(2)
 
 
