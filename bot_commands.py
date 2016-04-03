@@ -64,6 +64,8 @@ class AbstractBotCommand:
             except Exception as e:
                 logging.exception("Unexpected error while dispatching...")
                 logging.error(traceback.format_exc())
+                yield from self.client.send_to_debug_channel(
+                    "Unexpected error while dispatching '{}': {}".format(cmd, traceback.format_exc()))
         else:
             logging.info("Command '%s' not found...", cmd)
 
@@ -153,7 +155,7 @@ class UpdateRolesCommand:
     def handle_command(self, message, cmd, params):
         logging.info("in UpdateRolesCommand.handle_command()")
         if message.channel == self.client.debug_channel:
-            yield from self.client.update_roles(self.client.main_server)
+            self.client.update_roles(self.client.main_server)
             yield from self.client.send_message(message.channel, self.client.get_roles_str(self.client.main_server))
 
 
