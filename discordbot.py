@@ -167,11 +167,11 @@ class MyDiscordBotClient(discord.Client):
 
     def get_roles_str(self, server):
         """ Returns a list of roles as a string """
-        retrstr = ""
+        retstr = ""
         for role in self.roles:
             retstr = retstr + str(role) + " " + str(self.roles[role].name)  + ", "
 
-        return retrstr
+        return retstr
 
 
     @asyncio.coroutine
