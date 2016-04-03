@@ -58,6 +58,7 @@ class MyDiscordBotClient(discord.Client):
         self.everyone_group = None
 
         self.main_server_id = main_server_id
+        self.main_server = None
 
         # store the time when the bot started
         self.start_time = datetime.now()
@@ -103,16 +104,16 @@ class MyDiscordBotClient(discord.Client):
         logging.info("Checking which servers we are connected to")
         for serv in self.servers:
             if serv.id == self.main_server_id:
-                main_server = serv
+                self.main_server = serv
                 print("Found main server! ", serv)
             else:
                 print("skipping server ", serv)
 
         # update list of available channels
-        self.update_channels(main_server)
+        self.update_channels(self.main_server)
 
         # update list of available roles
-        self.update_roles(main_server)
+        self.update_roles(self.main_server)
 
         # Send a message to a destination
         yield from self.send_to_debug_channel("I am back {}!".format(str(datetime.now())))
@@ -122,7 +123,7 @@ class MyDiscordBotClient(discord.Client):
         # verify users, run this until the end
         logging.info("starting async loops...")
         loop = asyncio.get_event_loop()
-        self.verify_users_loop = asyncio.async(self.verify_users(main_server))
+        self.verify_users_loop = asyncio.async(self.verify_users(self.main_server))
         if len(self.fleetbot_channels) > 0:
             self.forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
 
