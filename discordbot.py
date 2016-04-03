@@ -164,6 +164,15 @@ class MyDiscordBotClient(discord.Client):
         self.everyone_group = server.default_role
 
 
+    def get_roles_str(self, server):
+        """ Returns a list of roles as a string """
+        retrstr = ""
+        for role in self.roles:
+            retstr = retstr + str(role) + " " + str(self.roles[role].name)  + ", "
+
+        return retrstr
+
+
     @asyncio.coroutine
     def handle_auth_token(self, author, auth_token):
         """ handles an auth token sent by author """

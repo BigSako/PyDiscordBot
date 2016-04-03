@@ -143,6 +143,20 @@ class UptimeBotCommand:
 
 
 
+class UpdateRolesCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!update_roles"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in UpdateRolesCommand.handle_command()")
+        if message.channel == self.client.debug_channel:
+            yield from self.client.update_roles(self.client.main_server)
+            yield from self.client.send_message(message.channel, self.client.get_roles_str(self.client.main_server))
+
+
 
 class CookieBotCommand:
     cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
