@@ -120,6 +120,18 @@ class WhoamiBotCommand:
             yield from self.client.send_message(message.channel, "<@" + str(message.author.id) + "> I am sorry, I do not know you!")
 
 
+class CatCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!evetime"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in CatCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "http://thecatapi.com/api/images/get?format=src&type=gif&time=" + str(random.randint(0, 5000)))
+
+
 class EveTimeCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
@@ -236,7 +248,8 @@ class CookieBotCommand:
                        "Share your :cookie: with a friend!", "Cookie? :cookie:", "NO!",
                        "http://i4.manchestereveningnews.co.uk/incoming/article10580003.ece/ALTERNATES/s615/JS47622759.jpg",
                        "Waiting on a cookie delivery... :car: ", "Nobody ever gives me cookies :(",
-                       "Omnomnomnom sorry, that was the last one! :cry: "]
+                       "Omnomnomnom sorry, that was the last one! :cry: ",
+                       "You want my :cookie:?", "I give you :cookie: "]
 
     positive_cookie_messages = ["Have a :cookie:!", "I think you need a :cookie:!",
                                 "Want a :cookie:?", "Have two :cookie:!"]
@@ -245,11 +258,19 @@ class CookieBotCommand:
         self.client = discord_client
         self.model = db_model
         self.cmd = "!cookie"
+        self.stats = {}
 
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         logging.info("in CookieBotCommand.handle_command()")
+        author = str(message.author)
+
         if params == "":
+            if author in self.stats:
+                self.stats[author] += 1
+            else:
+                self.stats[author] = 1
+
             idx = random.randint(0,len(CookieBotCommand.cookie_messages)) % len(CookieBotCommand.cookie_messages)
             yield from self.client.send_message(message.channel, CookieBotCommand.cookie_messages[idx])
         else: # params = username
@@ -258,6 +279,13 @@ class CookieBotCommand:
                 idx = random.randint(0,len(CookieBotCommand.positive_cookie_messages)) % len(CookieBotCommand.positive_cookie_messages)
 
                 yield from self.client.send_message(message.channel, "<@" + wanted_member_id + "> " + CookieBotCommand.positive_cookie_messages[idx])
+            elif "stats" in params:
+                if author in self.stats:
+                    cnt = self.stats[author]
+                else:
+                    cnt = 0
+                    
+                yield from self.client.send_message(message.channel, "You already got " + str(cnt) + " cookies!")
 
 
 class WhiskeyBotCommand:
