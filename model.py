@@ -152,8 +152,11 @@ class MyDBModel:
             LIMIT 0 , 1"""
         with self.db.cursor() as cursor:
             cursor.execute(sql, (str(last_id),))
-            result = cursor.fetchone()
-            return result['external_kill_ID']
+            try:
+                result = cursor.fetchone()
+                return result['external_kill_ID']
+            except:
+                return 0
         return 0
 
 
