@@ -367,12 +367,11 @@ class WikiBotcommand:
         url = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + params + "&limit=1&namespace=0&format=json"
         response = urllib.request.urlopen(url)
         response = str(response.read().decode())
-        yield from self.client.send_message(message.channel,
-                                            "response='" + response + "'")
+
         data = json.loads(response)
 
         if len(data)> 0 and len(data[1]) > 0:
-            msg = str(data[2][0]) + " " + str(data[3][0])
+            msg = str(data[3][0])
             yield from self.client.send_message(message.channel, msg)
 
 
