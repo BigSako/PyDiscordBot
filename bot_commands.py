@@ -124,7 +124,7 @@ class CatCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
         self.model = db_model
-        self.cmd = "!evetime"
+        self.cmd = "!cat"
 
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
@@ -284,7 +284,7 @@ class CookieBotCommand:
                     cnt = self.stats[author]
                 else:
                     cnt = 0
-                    
+
                 yield from self.client.send_message(message.channel, "You already got " + str(cnt) + " cookies!")
 
 
