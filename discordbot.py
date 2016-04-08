@@ -350,6 +350,7 @@ class MyDiscordBotClient(discord.Client):
             yield from asyncio.sleep(2)
 
 
+    @asyncio.coroutine
     def post_killmail_to_chan(self, external_kill_ID):
         """ Method for forwarding a zkill link to post_expensive_killmails_channel"""
         if self.post_expensive_killmails_channel != None and external_kill_ID != 0:
@@ -361,8 +362,10 @@ class MyDiscordBotClient(discord.Client):
         last_id = 0
 
         while True:
-            killmail_id = self.model.get_expensive_killmails(last_id)
-            self.post_killmail_to_chan(killmail_id)
+            if self.post_expensive_killmails_channel != None:
+                killmail_id = self.model.get_expensive_killmails(last_id)
+                logging.info("returned killmail_id=" + str(killmail_id))
+                yield from self.post_killmail_to_chan(killmail_id)
 
 
             yield from asyncio.sleep(30)
