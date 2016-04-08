@@ -64,7 +64,7 @@ class AbstractBotCommand:
             except Exception as e:
                 logging.exception("Unexpected error while dispatching...")
                 logging.error(traceback.format_exc())
-                yield from self.client.send_to_debug_channel(
+                yield from AbstractBotCommand.available_commands[cmd].client.send_to_debug_channel(
                     "Unexpected error while dispatching '{}': {}".format(cmd, traceback.format_exc()))
         else:
             logging.info("Command '%s' not found...", cmd)
@@ -167,7 +167,7 @@ class SpainCommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         logging.info("in SpainCommand.handle_command()")
-        yield from self.client.send_message(message.channel, "Yes no :spain: ")
+        yield from self.client.send_message(message.channel, "Yes no :es: ")
 
 
 class PenisCommand:
