@@ -88,6 +88,8 @@ class MyDiscordBotClient(discord.Client):
                 # fleetbot_ncdot->BC/NORTHERN_COALITION
                 channel_name = tmpchannels[0]
                 broadcast_name = tmpchannels[1]
+                # e.g. fleetbot_supers->BC/SUPERCARRIERS; TITANS
+
                 self.fleetbot_channels[channel_name] = broadcast_name
 
 
@@ -151,7 +153,10 @@ class MyDiscordBotClient(discord.Client):
             elif channel.name in self.fleetbot_channels.keys():
                 bckey = self.fleetbot_channels[channel.name]
                 logging.info("Found Fleetbot Channel '%s', assigning to broadcast key '%s'", channel.name, bckey)
-                self.group_channels[bckey] = channel
+                if bckey not in self.group_channels:
+                    self.group_channels[bckey] = [ channel ]
+                else:
+                    self.group_channels[bckey].append(channel)
 
 
     def update_roles(self, server):
@@ -473,5 +478,6 @@ class MyDiscordBotClient(discord.Client):
     @asyncio.coroutine
     def send_to_fleetbot_channel(self, group, msg):
         """ sends a message to a fleetbot channel """
-        if group in self.group_channels.keys():
-            yield from self.send_message(self.group_channels[group], msg)
+        if group in self.group_channels:
+            for channel in self.group_channels[group]:
+                yield from self.send_message(channel, msg)
