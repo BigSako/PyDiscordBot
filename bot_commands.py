@@ -366,6 +366,7 @@ class WikiBotcommand:
         # lookup params at wikipedia api
         url = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + params + "&limit=1&namespace=0&format=json"
         response = urllib.request.urlopen(url)
+        yield from self.client_send_message(message.channel, "response='" + str(response) + "'")
         data = json.loads(str(response.read()))
 
         if len(data[1]) > 0:
