@@ -3,6 +3,8 @@
 import logging
 import asyncio
 from datetime import datetime
+import json
+import urllib
 
 from model import MyDBModel
 import random
@@ -313,6 +315,7 @@ class ScotchBotCommand:
 
 
 
+
 class CafeBotCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
@@ -348,6 +351,26 @@ class USABotCommand:
     def handle_command(self, message, cmd, params):
         logging.info("in USABotCommand.handle_command()")
         yield from self.client.send_message(message.channel, "USA! USA! U S A! U S A! :us:")
+
+
+class WikiBotcommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!wiki"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in WikiBotcommand.handle_command()")
+        # lookup params at wikipedia api
+        url = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + params + "&limit=1&namespace=0&format=json"
+        response = yield from urllib.urlopen(url)
+        data = json.loads(response.read())
+
+        if len(data[1]) > 0:
+            msg = data[2][0] + " " + data[3][0]
+            yield from self.client.send_message(message.channel, msg)
+
 
 
 
