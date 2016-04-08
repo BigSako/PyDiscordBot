@@ -194,6 +194,29 @@ class PKCommand:
         yield from self.client.send_message(message.channel, "I heard PK is a :whale:")
 
 
+class DeathCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!death"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in DeathCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "https://www.youtube.com/watch?v=hdcTmpvDO0I")
+
+
+class WhiteCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!white"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in WhiteCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "http://41.media.tumblr.com/tumblr_ls2cgdq2yL1qa04m7o1_500.png")
+
 
 class CookieBotCommand:
     cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
