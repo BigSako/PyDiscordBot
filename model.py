@@ -143,6 +143,19 @@ class MyDBModel:
         return 0
 
 
+    def get_expensive_killmails(self, last_id=0):
+        """ returns the most expensive kills """
+        sql = """SELECT external_kill_ID
+            FROM  `kills_killmails`
+            WHERE zkb_total_value > 1000000000 AND external_kill_ID > %s
+            ORDER BY kill_time DESC
+            LIMIT 0 , 1"""
+        with self.db.cursor() as cursor:
+            cursor.execute(sql, (str(last_id),))
+            result = cursor.fetchone()
+            return result['external_kill_ID']
+        return 0
+
 
     def get_fleetbot_messages(self, last_id=0):
         """ returns a list of fleetbot messages by group """

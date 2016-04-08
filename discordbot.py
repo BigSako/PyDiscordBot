@@ -38,7 +38,7 @@ class MyDiscordBotClient(discord.Client):
     """ Creates a discord client application based on discord.Client, which
     handles authentication with a pre-defined EvE Online auth database """
     def __init__(self, db, debug_channel_name, auth_website, main_server_id,
-                 time_dep_groups, fleetbot_channels):
+                 time_dep_groups, fleetbot_channels, post_expensive_killmails_to):
         self.db = db # the database
         self.debug_channel_name = debug_channel_name
         self.auth_website = auth_website
@@ -52,6 +52,9 @@ class MyDiscordBotClient(discord.Client):
         self.debug_channel = None
 
         self.group_channels = {}
+
+        self.post_expensive_killmails_to = post_expensive_killmails_to
+        self.post_expensive_killmails_channel = None
 
         self.currently_online_members = {} # a list of online users
         self.roles = {}
@@ -68,6 +71,7 @@ class MyDiscordBotClient(discord.Client):
 
         self.verify_users_loop = None
         self.forward_fleetbot_loop = None
+        self.forward_zkill_loop = None
 
         if time_dep_groups != "":
             logging.info("Parsing time_dep_groups=" + time_dep_groups)
@@ -131,6 +135,10 @@ class MyDiscordBotClient(discord.Client):
         if len(self.fleetbot_channels) > 0:
             self.forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
 
+        # start forward zkill loop
+        if self.forward_zkillboard_expensive_killmails != "":
+            self.forward_zkill_loop = asyncio.async(self.forward_zkillboard_expensive_killmails())
+
     def stop_additional_loops(self):
         """ stops verify users loop and forward fleetbot loop """
         if self.verify_users_loop:
@@ -139,7 +147,9 @@ class MyDiscordBotClient(discord.Client):
         if self.forward_fleetbot_loop:
             logging.info("stopping forward fleetbot loop")
             self.forward_fleetbot_loop.cancel()
-
+        if self.forward_zkill_loop:
+            logging.info("stopping forward zkill loop")
+            self.forward_zkill_loop.cancel()
 
 
     def update_channels(self, server):
@@ -160,6 +170,8 @@ class MyDiscordBotClient(discord.Client):
                         self.group_channels[bckey] = [ channel ]
                     else:
                         self.group_channels[bckey].append(channel)
+            if channel.name == self.post_expensive_killmails_to:
+                self.post_expensive_killmails_channel = channel
 
 
     def update_roles(self, server):
@@ -336,6 +348,25 @@ class MyDiscordBotClient(discord.Client):
             logging.info(str(sys.exc_info()[0]))
             logging.info(tb)
             yield from asyncio.sleep(2)
+
+
+    def post_killmail_to_chan(self, external_kill_ID):
+        """ Method for forwarding a zkill link to post_expensive_killmails_channel"""
+        if self.post_expensive_killmails_channel != None and external_kill_ID != 0:
+            yield from self.send_message(self.post_expensive_killmails_channel, "https://zkillboard.com/kill/" + str(external_kill_ID) + "/")
+
+    def forward_zkillboard_expensive_killmails(self):
+        logging.info("starting zkillboard forward loop")
+
+        last_id = 0
+
+        while True:
+            killmail_id = self.model.get_expensive_killmails(last_id)
+            self.post_killmail_to_chan(killmail_id)
+
+
+            yield from asyncio.sleep(30)
+            last_id = killmail_id
 
 
     def forward_fleetbot_messages(self):
