@@ -364,12 +364,12 @@ class MyDiscordBotClient(discord.Client):
         while True:
             if self.post_expensive_killmails_channel != None:
                 killmail_id = self.model.get_expensive_killmails(last_id)
-                logging.info("returned killmail_id=" + str(killmail_id))
-                yield from self.post_killmail_to_chan(killmail_id)
-
+                if killmail_id != 0:
+                    logging.info("returned killmail_id=" + str(killmail_id))
+                    yield from self.post_killmail_to_chan(killmail_id)
+                    last_id = killmail_id
 
             yield from asyncio.sleep(30)
-            last_id = killmail_id
 
 
     def forward_fleetbot_messages(self):
