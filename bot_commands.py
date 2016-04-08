@@ -158,6 +158,41 @@ class UpdateRolesCommand:
             self.client.update_roles(self.client.main_server)
             yield from self.client.send_message(message.channel, self.client.get_roles_str(self.client.main_server))
 
+class SpainCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!spain"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in SpainCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "Yes no :spain: ")
+
+
+class PenisCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!penis"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in PenisCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "Why????!???")
+
+
+class PKCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!pk"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in PKCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "I heard PK is a :whale:")
+
 
 
 class CookieBotCommand:
@@ -166,13 +201,19 @@ class CookieBotCommand:
                        "C is for :cookie:", "https://www.youtube.com/watch?v=Ye8mB6VsUHw",
                        "https://www.youtube.com/watch?v=-qTIGg3I5y8", "I think you had enough!",
                        "Okay, but only one more :cookie:!", "I like cookies too! :thumbsup:",
+                       "C O O K I E", ":cookie: :cookie: :cookie: :cookie: :cookie: :cookie: :cookie: :cookie:",
+                       "Cafe?", "Beer?", "Cake?", "One cookie for you. One cookie. I said one! :cookie: ",
+                       "All you eat is cookies... ", "All your cookies are belong to us",
+                       "http://rack.0.mshcdn.com/media/ZgkyMDEzLzEwLzA3L2JmL0Nvb2tpZU1vbnN0LmE4NjZlLmpwZwpwCXRodW1iCTk1MHg1MzQjCmUJanBn/19941105/9eb/CookieMonster.jpg",
+                       "http://orig08.deviantart.net/357b/f/2011/235/d/8/cute_cookie_x3_by_lanahx3-d47lt9o.jpg",
+                       "You want cookie? Yes no spain?",
                        "Please wait, while we process your request...", "Free Cookies for everyone! :cookie: :cookie: :cookie: :cookie: :cookie:",
                        "Omnomnomnomnom... You want a :cookie: too?", "Sorry, but Deathwhisper ate all my cookies :(",
                        "Are you sure?", "The cookie is a lie!", "Ofcourse! Here is a :cookie: for you!",
                        "Share your :cookie: with a friend!", "Cookie? :cookie:", "NO!",
                        "http://i4.manchestereveningnews.co.uk/incoming/article10580003.ece/ALTERNATES/s615/JS47622759.jpg",
-                       "Waiting on a cookie delivery...", "Nobody ever gives me cookies :(",
-                       "Omnomnomnom sorry, that was the last one!"]
+                       "Waiting on a cookie delivery... :car: ", "Nobody ever gives me cookies :(",
+                       "Omnomnomnom sorry, that was the last one! :cry: "]
 
     positive_cookie_messages = ["Have a :cookie:!", "I think you need a :cookie:!",
                                 "Want a :cookie:?", "Have two :cookie:!"]
