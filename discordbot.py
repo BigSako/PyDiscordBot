@@ -89,8 +89,10 @@ class MyDiscordBotClient(discord.Client):
                 channel_name = tmpchannels[0]
                 broadcast_name = tmpchannels[1]
                 # e.g. fleetbot_supers->BC/SUPERCARRIERS; TITANS
-
-                self.fleetbot_channels[channel_name] = broadcast_name
+                if channel_name not in self.fleetbot_channels:
+                    self.fleetbot_channels[channel_name] = [ broadcast_name ]
+                else:
+                    self.fleetbot_channels[channel_name].append(broadcast_name)
 
 
         # call super class init
@@ -150,13 +152,14 @@ class MyDiscordBotClient(discord.Client):
             if channel.name == self.debug_channel_name:
                 logging.info("Found debug channel '%s'", self.debug_channel_name)
                 self.debug_channel = channel
-            elif channel.name in self.fleetbot_channels.keys():
-                bckey = self.fleetbot_channels[channel.name]
-                logging.info("Found Fleetbot Channel '%s', assigning to broadcast key '%s'", channel.name, bckey)
-                if bckey not in self.group_channels:
-                    self.group_channels[bckey] = [ channel ]
-                else:
-                    self.group_channels[bckey].append(channel)
+            elif channel.name in self.fleetbot_channels:
+                bckeys = self.fleetbot_channels[channel.name]
+                for bckey in bckeys:
+                    logging.info("Found Fleetbot Channel '%s', assigning to broadcast key '%s'", channel.name, bckey)
+                    if bckey not in self.group_channels:
+                        self.group_channels[bckey] = [ channel ]
+                    else:
+                        self.group_channels[bckey].append(channel)
 
 
     def update_roles(self, server):
