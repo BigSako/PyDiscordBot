@@ -197,6 +197,18 @@ class PenisCommand:
         yield from self.client.send_message(message.channel, "Why????!???")
 
 
+class SpiritOneCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!spirit"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in SpiritOneCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "http://www.mtv.co.uk/sites/default/files/styles/carousel_wide/public/mtv_uk/articles/2014/09/18/bxmsvi0igaacgph.jpg?itok=q5ZARzHl")
+        
+
 class PKCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
