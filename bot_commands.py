@@ -207,7 +207,31 @@ class SpiritOneCommand:
     def handle_command(self, message, cmd, params):
         logging.info("in SpiritOneCommand.handle_command()")
         yield from self.client.send_message(message.channel, "http://www.mtv.co.uk/sites/default/files/styles/carousel_wide/public/mtv_uk/articles/2014/09/18/bxmsvi0igaacgph.jpg?itok=q5ZARzHl")
+
+class DanishCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!danish"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in DanishCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "http://itsfunny.org/wp-content/uploads/2013/01/Danish-tourist-on-vacantion.jpg")
         
+
+class AustraliaCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!australia"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in AustraliaCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "http://www.clickypix.com/wp-content/uploads/2013/10/meanwhile-in-australia-00025.jpg")
+        
+                
 
 class PKCommand:
     def __init__(self, db_model, discord_client):
