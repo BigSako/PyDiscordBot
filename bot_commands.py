@@ -6,6 +6,7 @@ from datetime import datetime
 import json
 import urllib
 import urllib.request
+import urllib.parse
 
 from model import MyDBModel
 import random
@@ -123,7 +124,28 @@ class WhoamiBotCommand:
             yield from self.client.send_message(message.channel, "<@" + str(message.author.id) + "> I am sorry, I do not know you!")
 
 
-class CatCommand:
+class ChuckBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!chuck"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in ChuckBotCommand.handle_command()")
+        # query http://thecatapi.com/api/images/get?format=src&type=gif
+        response = urllib.request.urlopen("http://api.icndb.com/jokes/random")
+        response = str(response.read().decode())
+        data = json.loads(response)
+
+        joke = data['value']['joke']
+
+        yield from self.client.send_message(message.channel, joke)
+
+
+
+
+class CatBotCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
         self.model = db_model
@@ -131,8 +153,10 @@ class CatCommand:
 
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
-        logging.info("in CatCommand.handle_command()")
-        yield from self.client.send_message(message.channel, "http://thecatapi.com/api/images/get?format=src&type=gif&time=" + str(random.randint(0, 5000)))
+        logging.info("in CatBotCommand.handle_command()")
+        # query http://thecatapi.com/api/images/get?format=src&type=gif
+        response = urllib.request.urlopen("http://thecatapi.com/api/images/get?format=src&type=gif")
+        yield from self.client.send_message(message.channel, response.url)
 
 
 class EveTimeCommand:
@@ -218,7 +242,7 @@ class DanishCommand:
     def handle_command(self, message, cmd, params):
         logging.info("in DanishCommand.handle_command()")
         yield from self.client.send_message(message.channel, "http://itsfunny.org/wp-content/uploads/2013/01/Danish-tourist-on-vacantion.jpg")
-        
+
 
 class AustraliaCommand:
     def __init__(self, db_model, discord_client):
@@ -230,8 +254,8 @@ class AustraliaCommand:
     def handle_command(self, message, cmd, params):
         logging.info("in AustraliaCommand.handle_command()")
         yield from self.client.send_message(message.channel, "http://www.clickypix.com/wp-content/uploads/2013/10/meanwhile-in-australia-00025.jpg")
-        
-                
+
+
 
 class PKCommand:
     def __init__(self, db_model, discord_client):
@@ -377,6 +401,17 @@ class CakeBotCommand:
         yield from self.client.send_message(message.channel, "The cake is a lie!")
 
 
+class BeerBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!beer"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in BeerBotCommand.handle_command()")
+        yield from self.client.send_message(message.channel, ":beers:")
+
 
 class USABotCommand:
     def __init__(self, db_model, discord_client):
@@ -400,7 +435,8 @@ class WikiBotcommand:
     def handle_command(self, message, cmd, params):
         logging.info("in WikiBotcommand.handle_command()")
         # lookup params at wikipedia api
-        url = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + params + "&limit=1&namespace=0&format=json"
+        search_q = urllib.parse.quote(params)
+        url = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + search_q + "&limit=1&namespace=0&format=json"
         response = urllib.request.urlopen(url)
         response = str(response.read().decode())
 
