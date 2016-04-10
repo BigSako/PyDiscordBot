@@ -257,6 +257,30 @@ class AustraliaCommand:
 
 
 
+class CamelBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!camel"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in CamelBotCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "https://www.youtube.com/watch?v=ZBIGwtyqBhA")
+
+
+class MooseBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!moose"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in MooseBotCommand.handle_command()")
+        yield from self.client.send_message(message.channel, "https://www.youtube.com/watch?v=--PyKhohVcY")
+
+
 class PKCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
@@ -306,7 +330,7 @@ class CookieBotCommand:
                        "http://orig08.deviantart.net/357b/f/2011/235/d/8/cute_cookie_x3_by_lanahx3-d47lt9o.jpg",
                        "You want cookie? Yes no spain?",
                        "Please wait, while we process your request...", "Free Cookies for everyone! :cookie: :cookie: :cookie: :cookie: :cookie:",
-                       "Omnomnomnomnom... You want a :cookie: too?", "Sorry, but Deathwhisper ate all my cookies :(",
+                       "Omnomnomnomnom... :yum: You want a :cookie: too?", "Sorry, but Deathwhisper ate all my cookies :(",
                        "Are you sure?", "The cookie is a lie!", "Ofcourse! Here is a :cookie: for you!",
                        "Share your :cookie: with a friend!", "Cookie? :cookie:", "NO!",
                        "http://i4.manchestereveningnews.co.uk/incoming/article10580003.ece/ALTERNATES/s615/JS47622759.jpg",
@@ -402,6 +426,21 @@ class CakeBotCommand:
 
 
 class BeerBotCommand:
+    messages = ["Beer is proof that God loves us and wants us to be happy. :beer:"
+                "Milk is for babies. When you grow up you have to drink beer. :beer:",
+                "Yes, :beer: for everyone! :beers:",
+                "An Irishman is the only man in the world who will step over the bodies of a dozen naked women to get to a bottle of stout.",
+                "Beer! The cause and solution to all of life's problems. ",
+                "A woman is like beer. They look good, they smell good, and you'd step over your own mother just to get one! ",
+                "Me no function beer well without.",
+                "https://bierologie.de/wp-content/uploads/2015/04/glass-of-beer.png",
+                "Would you not rather have a :cookie:?",
+                "http://pngimg.com/upload/beer_PNG2346.png",
+                "http://i.telegraph.co.uk/multimedia/archive/02326/obama_2326627b.jpg",
+                "https://thelistlove.files.wordpress.com/2014/03/47.jpg",
+                "Beer Pong is a sport, right guys?",
+                "B E E R! :beers: Everyone drink! :beer: "
+                ]
     def __init__(self, db_model, discord_client):
         self.client = discord_client
         self.model = db_model
@@ -410,7 +449,9 @@ class BeerBotCommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         logging.info("in BeerBotCommand.handle_command()")
-        yield from self.client.send_message(message.channel, ":beers:")
+        idx = random.randint(0,len(BeerBotCommand.messages)) % len((BeerBotCommand.messages)
+
+        yield from self.client.send_message(message.channel, BeerBotCommand.messages[idx])
 
 
 class USABotCommand:
