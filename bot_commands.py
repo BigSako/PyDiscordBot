@@ -449,7 +449,7 @@ class BeerBotCommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         logging.info("in BeerBotCommand.handle_command()")
-        idx = random.randint(0,len(BeerBotCommand.messages)) % len((BeerBotCommand.messages)
+        idx = random.randint(0,len(BeerBotCommand.messages)) % len(BeerBotCommand.messages)
 
         yield from self.client.send_message(message.channel, BeerBotCommand.messages[idx])
 
