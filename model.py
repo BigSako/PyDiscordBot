@@ -147,7 +147,7 @@ class MyDBModel:
         """ returns the most expensive kills """
         sql = """SELECT external_kill_ID
             FROM  `kills_killmails`
-            WHERE zkb_total_value > 1000000000 AND external_kill_ID > %s
+            WHERE zkb_total_value > 2000000000 AND external_kill_ID > %s
             ORDER BY kill_time DESC
             LIMIT 0 , 1"""
         with self.db.cursor() as cursor:
