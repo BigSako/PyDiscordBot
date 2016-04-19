@@ -10,7 +10,7 @@ This is a DISCORD Bot developed by [BigSako](http://evewho.com/pilot/BigSako), w
 
 E.g., on Ubuntu/Debian:
 ```
-sudo apt-get install python-virtualenv python3.4
+sudo apt-get install python-virtualenv python3.4 python3-dev
 sudo apt-get install git
 ```
 
