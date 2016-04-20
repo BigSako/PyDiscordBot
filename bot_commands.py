@@ -329,9 +329,14 @@ class FindPOSBotCommand:
         channelname = str(message.channel)
         if "directors" in channelname or "managers" in channelname or "debug" in channelname or "it_room" in channelname:
             if params == "":
-                pos = self.model.find_pos()
+                poslist = self.model.find_pos()
+                pos_str = ""
+
+                for moon in poslist.keys():
+                    pos_str += moon + " (" + str(poslist[moon]) + "), "
+
                 yield from self.client.send_message(message.channel,
-                                                    "<@" + message.author.id + "> " + ", ".join(pos))
+                                                    "<@" + message.author.id + "> " + pos_str)
             else:
                 result = self.model.find_system(params)
                 if result == None:
