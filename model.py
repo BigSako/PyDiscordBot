@@ -143,6 +143,28 @@ class MyDBModel:
         return 0
 
 
+    def find_system(self, system_str):
+        """ Returns a system and region name based on system_str (partial) """
+        sql = """SELECT regionName, solarSystemID, solarSystemName
+            FROM eve_staticdata.mapSolarSystems s, eve_staticdata.mapRegions r
+            WHERE r.regionID = s.regionID and `solarSystemName` LIKE %s"""
+        with self.db.cursor() as cursor:
+            number = cursor.execute(sql, (system_str,))
+            if number == 1:
+                result = cursor.fetchone()
+                cursor.close()
+                return {'region': result['regionName'], 'solarSystemID': result['solarSystemID'], 'solarSystemName': result['solarSystemName']}
+            elif number == 0:
+                cursor.close()
+                return None
+            else:
+                system_names = []
+                for row in cursor:
+                    system_names.append(row['solarSystemName'] + " (" + row['regionName'] + ")")
+                cursor.close()
+                return system_names
+
+
     def get_expensive_killmails(self, last_id=0):
         """ returns the most expensive kill within the last 3 hours """
         sql = """SELECT external_kill_ID

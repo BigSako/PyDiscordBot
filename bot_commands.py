@@ -317,6 +317,25 @@ class WhiteCommand:
         yield from self.client.send_message(message.channel, "http://41.media.tumblr.com/tumblr_ls2cgdq2yL1qa04m7o1_500.png")
 
 
+class FindSystemBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!system"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in FindSystemBotCommand.handle_command()")
+        result = self.model.find_system(params)
+        if result == None:
+            yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
+        elif isinstance(result, dict):
+            yield from self.client.send_message(message.channel, "<@" + message.author.id + "> " + result['solarSystemName'] + " in " + result['regionName'])
+        else:
+            resultstr = ", ".join(result)
+            yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Which one did you mean? " + resultstr)
+
+
 class CookieBotCommand:
     cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
                        "Have two :cookie:", "Sorry, I am out of cookies! Oh wait, found one! :cookie:",
