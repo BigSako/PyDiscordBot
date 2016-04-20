@@ -150,7 +150,7 @@ class MyDBModel:
         eve_staticdata.mapDenormalize d WHERE state=0  AND d.itemID = s.moonID"""
 
         if solar_system_id != None:
-            sql += " AND s.locationID = str(solar_system_id)"
+            sql += " AND s.locationID = " + str(solar_system_id)
 
         with self.db.cursor() as cursor:
             number = cursor.execute(sql)
