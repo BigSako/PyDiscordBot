@@ -143,6 +143,11 @@ class MyDBModel:
         return 0
 
 
+    def find_pos(self, solar_system_id):
+        """ Returns a list of POSes in that system """
+        return ["TODO Work In Progress"]
+
+
     def find_system(self, system_str):
         """ Returns a system and region name based on system_str (partial) """
         system_str = system_str + "%"

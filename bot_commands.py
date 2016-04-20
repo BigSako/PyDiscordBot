@@ -317,6 +317,30 @@ class WhiteCommand:
         yield from self.client.send_message(message.channel, "http://41.media.tumblr.com/tumblr_ls2cgdq2yL1qa04m7o1_500.png")
 
 
+class FindPOSBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!pos"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in FindPOSBotCommand.handle_command()")
+        if "directors" in message.channel or "managers" in message.channel or "debug" in message.channel:
+            result = self.model.find_system(params)
+            if result == None:
+                yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
+            elif isinstance(result, dict):
+                pos = self.model.find_pos(result['solarSystemID'])
+                yield from self.client.send_message(message.channel,
+                                                    "<@" + message.author.id + "> Looking for POS in " + result['solarSystemName'] + ": " + str(pos))
+            else:
+                resultstr = ", ".join(result)
+                yield from self.client.send_message(message.channel,
+                                                    "<@" + message.author.id + "> Which one did you mean? " + resultstr)
+
+
+
 class FindSystemBotCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
@@ -330,10 +354,13 @@ class FindSystemBotCommand:
         if result == None:
             yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
         elif isinstance(result, dict):
-            yield from self.client.send_message(message.channel, "<@" + message.author.id + "> " + result['solarSystemName'] + " in " + result['regionName'])
+            dotlan_str = "http://evemaps.dotlan.net/system/" + result['solarSystemName'.replace(" ", "_")
+            yield from self.client.send_message(message.channel,
+                                                "<@" + message.author.id + "> " + result['solarSystemName'] + " - " + result['regionName'] + " " + dotlan_str)
         else:
             resultstr = ", ".join(result)
-            yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Which one did you mean? " + resultstr)
+            yield from self.client.send_message(message.channel,
+                                                "<@" + message.author.id + "> Which one did you mean? " + resultstr)
 
 
 class CookieBotCommand:
