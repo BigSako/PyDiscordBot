@@ -328,17 +328,22 @@ class FindPOSBotCommand:
         logging.info("in FindPOSBotCommand.handle_command()")
         channelname = str(message.channel)
         if "directors" in channelname or "managers" in channelname or "debug" in channelname or "it_room" in channelname:
-            result = self.model.find_system(params)
-            if result == None:
-                yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
-            elif isinstance(result, dict):
-                pos = self.model.find_pos(result['solarSystemID'])
+            if params == "":
+                pos = self.model.find_pos()
                 yield from self.client.send_message(message.channel,
-                                                    "<@" + message.author.id + "> Looking for POS in " + result['solarSystemName'] + ": " + str(pos))
+                                                    "<@" + message.author.id + "> " + ", ".join(pos))
             else:
-                resultstr = ", ".join(result)
-                yield from self.client.send_message(message.channel,
-                                                    "<@" + message.author.id + "> Which one did you mean? " + resultstr)
+                result = self.model.find_system(params)
+                if result == None:
+                    yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
+                elif isinstance(result, dict):
+                    pos = self.model.find_pos(result['solarSystemID'])
+                    yield from self.client.send_message(message.channel,
+                                                        "<@" + message.author.id + "> Looking for POS in " + result['solarSystemName'] + ": " + ", ".join(pos))
+                else:
+                    resultstr = ", ".join(result)
+                    yield from self.client.send_message(message.channel,
+                                                        "<@" + message.author.id + "> Which one did you mean? " + resultstr)
 
 
 

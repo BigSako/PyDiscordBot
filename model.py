@@ -143,14 +143,17 @@ class MyDBModel:
         return 0
 
 
-    def find_pos(self, solar_system_id):
+    def find_pos(self, solar_system_id=None):
         """ Returns a list of POSes in that system """
+
         sql = """select s.typeID, pos_state, d.itemName FROM starbases s,
-        eve_staticdata.mapDenormalize d WHERE state=0  AND d.itemID = s.moonID
-        AND s.locationID = %s"""
+        eve_staticdata.mapDenormalize d WHERE state=0  AND d.itemID = s.moonID"""
+        
+        if solar_system_id != None:
+            sql += " AND s.locationID = str(solar_system_id)""
 
         with self.db.cursor() as cursor:
-            number = cursor.execute(sql, (solar_system_id,))
+            number = cursor.execute(sql)
             moon_names = []
             if number > 0:
                 for row in cursor:
