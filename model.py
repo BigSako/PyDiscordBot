@@ -144,10 +144,11 @@ class MyDBModel:
 
 
     def get_expensive_killmails(self, last_id=0):
-        """ returns the most expensive kills """
+        """ returns the most expensive kill within the last 3 hours """
         sql = """SELECT external_kill_ID
             FROM  `kills_killmails`
             WHERE zkb_total_value > 2000000000 AND external_kill_ID > %s
+            AND TIMESTAMPDIFF(HOUR,kill_time, now()) < 3
             ORDER BY kill_time DESC
             LIMIT 0 , 1"""
         with self.db.cursor() as cursor:
