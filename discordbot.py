@@ -267,12 +267,16 @@ class MyDiscordBotClient(discord.Client):
                     AbstractBotCommand.import_bot_commands(self.model, self)
                     avail_cmds = " ".join(AbstractBotCommand.available_commands.keys())
                     yield from self.send_to_debug_channel("Commands reloaded! Available commands: " + avail_cmds)
-                elif msg.upper().startswith("I LOVE"):
-                    yield from self.send_message(message.channel, "I am sure you do ;)")
-                elif msg.upper().startswith("I HATE"):
+                elif "I LOVE" in msg.upper():
+                    yield from self.send_message(message.channel, "I am sure you do ;) :panda_face: ")
+                elif "I HATE" in msg.upper():
                     yield from self.send_message(message.channel, "Haters gonna hate!")
-                elif msg.upper().startswith("I DISLIKE"):
+                elif "I DISLIKE" in msg.upper():
                     yield from self.send_message(message.channel, "I guess that's a valid opionion!")
+                elif "FUCK" in msg.upper():
+                    yield from self.send_message(message.channel, "Do you kiss your mother with that mouth? Watch your language!")
+                elif "LOL" in msg.upper():
+                    yield from self.send_message(message.channel, ":laughing: :laughing: :laughing: :laughing: :laughing: ")
                 elif msg.startswith("!"):
                     yield from AbstractBotCommand.handle_msg(message)
         else:
