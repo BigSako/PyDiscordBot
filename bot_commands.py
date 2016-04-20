@@ -328,28 +328,27 @@ class FindPOSBotCommand:
         logging.info("in FindPOSBotCommand.handle_command()")
         channelname = str(message.channel)
         if "directors" in channelname or "managers" in channelname or "debug" in channelname or "it_room" in channelname:
+            poslist = None
             if params == "":
                 poslist = self.model.find_pos()
-                pos_str = ""
-
-                for moon in poslist.keys():
-                    pos_str += moon + " (" + str(poslist[moon]) + "), "
-
-                yield from self.client.send_message(message.channel,
-                                                    "<@" + message.author.id + "> " + pos_str)
             else:
                 result = self.model.find_system(params)
                 if result == None:
                     yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
                 elif isinstance(result, dict):
-                    pos = self.model.find_pos(result['solarSystemID'])
-                    yield from self.client.send_message(message.channel,
-                                                        "<@" + message.author.id + "> Looking for POS in " + result['solarSystemName'] + ": " + ", ".join(pos))
+                    poslist = self.model.find_pos(result['solarSystemID'])
                 else:
                     resultstr = ", ".join(result)
                     yield from self.client.send_message(message.channel,
                                                         "<@" + message.author.id + "> Which one did you mean? " + resultstr)
+            if poslist != None:
+                pos_str = ""
 
+                for moon in poslist.keys():
+                    pos_str += moon + " (" + str(poslist[moon]) + "),\n"
+
+                yield from self.client.send_message(message.channel,
+                                                    "<@" + message.author.id + "> " + pos_str)
 
 
 class FindSystemBotCommand:
