@@ -145,7 +145,20 @@ class MyDBModel:
 
     def find_pos(self, solar_system_id):
         """ Returns a list of POSes in that system """
-        return ["TODO Work In Progress"]
+        sql = """select s.typeID, pos_state, d.itemName FROM starbases s,
+        eve_staticdata.mapDenormalize d WHERE state=0  AND d.itemID = s.moonID
+        AND s.locationID = %s"""
+
+        with self.db.cursor() as cursor:
+            number = cursor.execute(sql, (solar_system_id,))
+            moon_names = []
+            if number > 0:
+                for row in cursor:
+                    moon_names.append(row['itemName'])
+                cursor.close()
+                return moon_names
+            else:
+                return []
 
 
     def find_system(self, system_str):

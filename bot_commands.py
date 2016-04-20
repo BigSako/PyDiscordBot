@@ -326,7 +326,8 @@ class FindPOSBotCommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         logging.info("in FindPOSBotCommand.handle_command()")
-        if "directors" in message.channel or "managers" in message.channel or "debug" in message.channel:
+        channelname = str(message.channel)
+        if "directors" in channelname or "managers" in channelname or "debug" in channelname or "it_room" in channelname:
             result = self.model.find_system(params)
             if result == None:
                 yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
