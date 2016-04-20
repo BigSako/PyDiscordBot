@@ -153,7 +153,7 @@ class MyDBModel:
             if number == 1:
                 result = cursor.fetchone()
                 cursor.close()
-                return {'region': result['regionName'], 'solarSystemID': result['solarSystemID'], 'solarSystemName': result['solarSystemName']}
+                return {'regionName': result['regionName'], 'solarSystemID': result['solarSystemID'], 'solarSystemName': result['solarSystemName']}
             elif number == 0:
                 cursor.close()
                 return None
