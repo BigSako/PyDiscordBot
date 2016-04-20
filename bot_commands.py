@@ -354,7 +354,7 @@ class FindSystemBotCommand:
         if result == None:
             yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown System")
         elif isinstance(result, dict):
-            dotlan_str = "http://evemaps.dotlan.net/system/" + result['solarSystemName'.replace(" ", "_")
+            dotlan_str = "http://evemaps.dotlan.net/system/" + result['solarSystemName'].replace(" ", "_")
             yield from self.client.send_message(message.channel,
                                                 "<@" + message.author.id + "> " + result['solarSystemName'] + " - " + result['regionName'] + " " + dotlan_str)
         else:
