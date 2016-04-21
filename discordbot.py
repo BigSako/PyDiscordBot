@@ -273,8 +273,6 @@ class MyDiscordBotClient(discord.Client):
                     yield from self.send_message(message.channel, "Haters gonna hate!")
                 elif "I DISLIKE" in msg.upper():
                     yield from self.send_message(message.channel, "I guess that's a valid opionion!")
-                elif "FUCK" in msg.upper():
-                    yield from self.send_message(message.channel, "Do you kiss your mother with that mouth? Watch your language!")
                 elif "L0L" in msg.upper():
                     yield from self.send_message(message.channel, ":laughing: :laughing: :laughing: :laughing: :laughing: ")
                 elif msg.startswith("!"):
