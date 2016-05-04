@@ -233,7 +233,7 @@ class MyDBModel:
             else:
                 item_list = []
                 for row in cursor:
-                    item_list.append(result['typeName'])
+                    item_list.append(row['typeName'])
                 cursor.close()
                 return item_list
 
