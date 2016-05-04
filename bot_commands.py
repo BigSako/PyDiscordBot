@@ -364,7 +364,7 @@ class FindItemBotCommand:
         if result == None:
             yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown Item")
         elif isinstance(result, dict):
-            isk = model.get_item_price(result['id'])
+            isk = self.model.get_item_price(result['id'])
             if isk != None:
                 price = " ({:,}".format(isk) + " ISK)"
             else:
