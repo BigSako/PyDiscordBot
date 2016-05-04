@@ -456,15 +456,15 @@ class KillboardBotCommand:
         if message.author.id in self.client.authed_users:
             number_kills = self.model.get_discord_members_number_of_kills(message.author.id)
             if number_kills < 100:
-                yield from self.client.send_message(message.channel, "Whelp... you only have % killmails... " % number_kills)
+                yield from self.client.send_message(message.channel, "Whelp... you only have %d killmails... " % number_kills)
             elif number_kills < 500:
-                yield from self.client.send_message(message.channel, "Hm.... % killmails. :beer: " % number_kills)
+                yield from self.client.send_message(message.channel, "Hm.... %d killmails. :beer: " % number_kills)
             elif number_kills < 1500:
-                yield from self.client.send_message(message.channel, "Good! You have % killmails!" % number_kills)
+                yield from self.client.send_message(message.channel, "Good! You have %d killmails!" % number_kills)
             elif number_kills < 3000:
-                yield from self.client.send_message(message.channel, "You are an amazing person with % killmails!" % number_kills)
+                yield from self.client.send_message(message.channel, "Amazeballs! You already got %d killmails!" % number_kills)
             else:
-                yield from self.client.send_message(message.channel, "Do you even have a life? You have % killmails!" % number_kills)
+                yield from self.client.send_message(message.channel, "Do you even have a life? You have %d killmails!" % number_kills)
         else:
             yield from self.client.send_message(message.channel, "I do not have any kill records of you!")
 
