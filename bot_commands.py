@@ -443,6 +443,32 @@ class WhiskeyBotCommand:
         yield from self.client.send_message(message.channel, "<@" + message.author.id + "> invites everybody to drink a whiskey!")
 
 
+class KillboardBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!kills"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in KillboardBotCommand.handle_command()")
+        # get number of kills of this member
+        if message.author.id in self.client.authed_users:
+            number_kills = self.model.get_discord_members_number_of_kills(message.author.id)
+            if number_kills < 100:
+                yield from self.client.send_message(message.channel, "Whelp... you only have % killmails... " % number_kills)
+            elif number_kills < 500:
+                yield from self.client.send_message(message.channel, "Hm.... % killmails. :beer: " % number_kills)
+            elif number_kills < 1500:
+                yield from self.client.send_message(message.channel, "Good! You have % killmails!" % number_kills)
+            elif number_kills < 3000:
+                yield from self.client.send_message(message.channel, "You are an amazing person with % killmails!" % number_kills)
+            else:
+                yield from self.client.send_message(message.channel, "Do you even have a life? You have % killmails!" % number_kills)
+        else:
+            yield from self.client.send_message(message.channel, "I do not have any kill records of you!")
+
+
 class OpsBotcommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
@@ -454,7 +480,8 @@ class OpsBotcommand:
         logging.info("in OpsBotcommand.handle_command()")
         yield from self.client.send_message(message.channel, "https://ops.ncdot.co.uk/ (please log in using ncdot core auth)")
 
-class OpsBotcommand:
+
+class HelpBotcommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
         self.model = db_model
@@ -462,14 +489,14 @@ class OpsBotcommand:
 
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
-        logging.info("in OpsBotcommand.handle_command()")
+        logging.info("in HelpBotcommand.handle_command()")
         yield from self.client.send_message(message.channel, """
-                                            This Discord Bot supports many commands, among them:\n
-                                            !ops - display a link to the ops planner\n
-                                            !evetime - displays the current eve time\n
-                                            !system [SYSTEMANME] (e.g., !system Jita) - displays a dotlan link to that system\n
-                                            !pingme 8 20 - modify the EVE Time when you are receiving fleetbot pings\n
-                                            !beer, !cookie, !whiskey, !cafe, !cake - try it :P
+This Discord Bot supports many commands, among them:
+    !ops - display a link to the ops planner
+    !evetime - displays the current eve time
+    !system [SYSTEMANME] (e.g., !system Jita) - displays a dotlan link to that system
+    !pingme 8 20 - modify the EVE Time when you are receiving fleetbot pings
+    !beer, !cookie, !whiskey, !cafe, !cake - try it :P
                                             """
                                             )
 

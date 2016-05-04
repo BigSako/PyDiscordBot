@@ -72,6 +72,22 @@ class MyDBModel:
         return False
 
 
+    def get_discord_members_number_of_kills(self, member_id):
+        """ returns characters name, corporation name, character id based on the member id"""
+        with self.db.cursor() as cursor:
+            sql = """SELECT SUM(s.number_kills) as number_kills
+            FROM discord_auth a, auth_users b, api_characters c, kills_stats_per_char s
+            WHERE a.user_id = b.user_id AND b.user_id = c.user_id AND c.character_id = s.character_id
+            AND a.discord_member_id = %s"""
+
+            cursor.execute(sql, (member_id,))
+            row = cursor.fetchone()
+            cursor.close()
+
+            return row['number_kills']
+        return 0
+
+
     def get_discord_members_character_id(self, member_id):
         """ returns characters name, corporation name, character id based on the member id"""
         with self.db.cursor() as cursor:
