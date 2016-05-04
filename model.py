@@ -217,6 +217,7 @@ class MyDBModel:
 
     def find_item(self, item_str):
         """ Returns info about item """
+        orig_item_str = item_str
         item_str = item_str + "%"
         sql = """SELECT typeName, typeID, description
             FROM eve_staticdata.invTypes
@@ -233,6 +234,10 @@ class MyDBModel:
             else:
                 item_list = []
                 for row in cursor:
+                    if row['typeName'] == orig_item_str:
+                        cursor.close()
+                        return {'name': row['typeName'], 'description': row['description']}
+
                     item_list.append(row['typeName'])
                 cursor.close()
                 return item_list
