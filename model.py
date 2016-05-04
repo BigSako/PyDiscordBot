@@ -214,6 +214,20 @@ class MyDBModel:
                 cursor.close()
                 return system_names
 
+    def get_item_price(self, item_type_id):
+        """ REturns the price (if it is in database) """
+        sql = """SELECT sell FROM prices WHERE type_id=%s"""
+        with self.db.cursor() as cursor:
+            number = cursor.execute(sql, (item_type_id,))
+            if number == 1:
+                result = cursor.fetchone()
+                cursor.close()
+                return result['sell']
+            elif number == 0:
+                cursor.close()
+                return None
+
+
 
     def find_item(self, item_str):
         """ Returns info about item """
@@ -227,7 +241,7 @@ class MyDBModel:
             if number == 1:
                 result = cursor.fetchone()
                 cursor.close()
-                return {'name': result['typeName'], 'description': result['description']}
+                return {'id': result['typeID'], 'name': result['typeName'], 'description': result['description']}
             elif number == 0:
                 cursor.close()
                 return None
@@ -236,7 +250,7 @@ class MyDBModel:
                 for row in cursor:
                     if row['typeName'] == orig_item_str:
                         cursor.close()
-                        return {'name': row['typeName'], 'description': row['description']}
+                        return {'id': row['typeID'], 'name': row['typeName'], 'description': row['description']}
 
                     item_list.append(row['typeName'])
                 cursor.close()

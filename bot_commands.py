@@ -364,7 +364,12 @@ class FindItemBotCommand:
         if result == None:
             yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown Item")
         elif isinstance(result, dict):
-            result_str = result['name'] + ": " + result['description']
+            isk = model.get_item_price(result['id'])
+            if isk != None:
+                price = " ({:,}".format(isk) + " ISK)"
+            else:
+                price = ""
+            result_str = result['name'] + price + " http://games.chruker.dk/eve_online/item.php?type_id=" + result['id']
             yield from self.client.send_message(message.channel,
                                                 "<@" + message.author.id + "> " + result_str)
         else:
