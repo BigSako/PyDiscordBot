@@ -443,6 +443,37 @@ class WhiskeyBotCommand:
         yield from self.client.send_message(message.channel, "<@" + message.author.id + "> invites everybody to drink a whiskey!")
 
 
+class OpsBotcommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!ops"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in OpsBotcommand.handle_command()")
+        yield from self.client.send_message(message.channel, "https://ops.ncdot.co.uk/ (please log in using ncdot core auth)")
+
+class OpsBotcommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!help"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in OpsBotcommand.handle_command()")
+        yield from self.client.send_message(message.channel, """
+                                            This Discord Bot supports many commands, among them:\n
+                                            !ops - display a link to the ops planner\n
+                                            !evetime - displays the current eve time\n
+                                            !system [SYSTEMANME] (e.g., !system Jita) - displays a dotlan link to that system\n
+                                            !pingme 8 20 - modify the EVE Time when you are receiving fleetbot pings\n
+                                            !beer, !cookie, !whiskey, !cafe, !cake - try it :P
+                                            """
+                                            )
+
+
 class ScotchBotCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
