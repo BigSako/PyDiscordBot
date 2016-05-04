@@ -215,6 +215,29 @@ class MyDBModel:
                 return system_names
 
 
+    def find_item(self, item_str):
+        """ Returns info about item """
+        item_str = item_str + "%"
+        sql = """SELECT typeName, typeID, description
+            FROM eve_staticdata.invTypes
+            WHERE typeName LIKE %s"""
+        with self.db.cursor() as cursor:
+            number = cursor.execute(sql, (item_str,))
+            if number == 1:
+                result = cursor.fetchone()
+                cursor.close()
+                return {'name': result['typeName'], 'description': result['description']}
+            elif number == 0:
+                cursor.close()
+                return None
+            else:
+                item_list = []
+                for row in cursor:
+                    item_list.append(result['typeName'])
+                cursor.close()
+                return item_list
+
+
     def get_expensive_killmails(self, last_id=0):
         """ returns the most expensive kill within the last 3 hours """
         sql = """SELECT external_kill_ID

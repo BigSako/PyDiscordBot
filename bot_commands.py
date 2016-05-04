@@ -351,6 +351,29 @@ class FindPOSBotCommand:
                                                     "<@" + message.author.id + "> " + pos_str)
 
 
+class FindItemBotCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord_client
+        self.model = db_model
+        self.cmd = "!item"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        logging.info("in FindItemBotCommand.handle_command()")
+        result = self.model.find_item(params)
+        if result == None:
+            yield from self.client.send_message(message.channel, "<@" + message.author.id + "> Unknown Item")
+        elif isinstance(result, dict):
+            result_str = result['name'] + ": " + result['description']
+            yield from self.client.send_message(message.channel,
+                                                "<@" + message.author.id + "> " + result_str)
+        else:
+            result_str = ", ".join(result)
+            yield from self.client.send_message(message.channel,
+                                                "<@" + message.author.id + "> Which one did you mean? " + result_str)
+
+
+
 class FindSystemBotCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client
@@ -556,7 +579,10 @@ class BeerBotCommand:
                 "https://thelistlove.files.wordpress.com/2014/03/47.jpg",
                 "Beer Pong is a sport, right guys?",
                 "B E E R! :beers: Everyone drink! :beer: "
+                "https://www.youtube.com/watch?v=25NQqK4E5vk",
+                "https://www.youtube.com/watch?v=QghICtdvNH4",
                 ]
+
     def __init__(self, db_model, discord_client):
         self.client = discord_client
         self.model = db_model
