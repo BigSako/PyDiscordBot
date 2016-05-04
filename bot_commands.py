@@ -369,7 +369,7 @@ class FindItemBotCommand:
                 price = " ({:,}".format(isk) + " ISK)"
             else:
                 price = ""
-            result_str = result['name'] + price + " http://games.chruker.dk/eve_online/item.php?type_id=" + result['id']
+            result_str = result['name'] + price + " http://games.chruker.dk/eve_online/item.php?type_id=" + str(result['id'])
             yield from self.client.send_message(message.channel,
                                                 "<@" + message.author.id + "> " + result_str)
         else:
