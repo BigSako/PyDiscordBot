@@ -461,10 +461,12 @@ class KillboardBotCommand:
                 yield from self.client.send_message(message.channel, "Hm.... %d killmails. :beer: " % number_kills)
             elif number_kills < 1500:
                 yield from self.client.send_message(message.channel, "Good! You have %d killmails!" % number_kills)
-            elif number_kills < 3000:
+            elif number_kills < 5000:
                 yield from self.client.send_message(message.channel, "Amazeballs! You already got %d killmails!" % number_kills)
-            else:
+            elif number_kills < 9000:
                 yield from self.client.send_message(message.channel, "Do you even have a life? You have %d killmails!" % number_kills)
+            else:
+                yield from self.client.send_message(message.channel, "W T F !?! It is over 9000!!!! You have %d killmails!!!!!!!111111" % number_kills)
         else:
             yield from self.client.send_message(message.channel, "I do not have any kill records of you!")
 
