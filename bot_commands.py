@@ -583,7 +583,7 @@ class BeerBotCommand:
                 "http://i.telegraph.co.uk/multimedia/archive/02326/obama_2326627b.jpg",
                 "https://thelistlove.files.wordpress.com/2014/03/47.jpg",
                 "Beer Pong is a sport, right guys?",
-                "B E E R! :beers: Everyone drink! :beer: "
+                "B E E R! :beers: Everyone drink! :beer: ",
                 "https://www.youtube.com/watch?v=25NQqK4E5vk",
                 "https://www.youtube.com/watch?v=QghICtdvNH4",
                 ]

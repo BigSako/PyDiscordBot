@@ -232,7 +232,7 @@ class MyDBModel:
     def find_item(self, item_str):
         """ Returns info about item """
         orig_item_str = item_str
-        item_str = item_str + "%"
+        item_str = "%" + item_str + "%"
         sql = """SELECT typeName, typeID, description
             FROM eve_staticdata.invTypes
             WHERE typeName LIKE %s"""
