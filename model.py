@@ -248,7 +248,7 @@ class MyDBModel:
             else:
                 item_list = []
                 for row in cursor:
-                    if row['typeName'] == orig_item_str:
+                    if row['typeName'].lower() == orig_item_str.lower():
                         cursor.close()
                         return {'id': row['typeID'], 'name': row['typeName'], 'description': row['description']}
 
