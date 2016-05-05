@@ -235,7 +235,7 @@ class MyDBModel:
         item_str = "%" + item_str + "%"
         sql = """SELECT typeName, typeID, description
             FROM eve_staticdata.invTypes
-            WHERE publish=1 AND typeName LIKE %s"""
+            WHERE published=1 AND typeName LIKE %s ORDER BY typename ASC LIMIT 0,5"""
         with self.db.cursor() as cursor:
             number = cursor.execute(sql, (item_str,))
             if number == 1:
