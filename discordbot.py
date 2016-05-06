@@ -193,6 +193,10 @@ class MyDiscordBotClient(discord.Client):
 
         return retstr
 
+    def clear_online_members(self):
+        """ clears the list of online members - mainly for debug purpose """
+        self.currently_online_members.clear()
+
 
     @asyncio.coroutine
     def handle_auth_token(self, author, auth_token):
@@ -267,6 +271,10 @@ class MyDiscordBotClient(discord.Client):
                     AbstractBotCommand.import_bot_commands(self.model, self)
                     avail_cmds = " ".join(AbstractBotCommand.available_commands.keys())
                     yield from self.send_to_debug_channel("Commands reloaded! Available commands: " + avail_cmds)
+                elif msg.startswith("!reload_commands") and message.channel == self.debug_channel:
+                    logging.info("Trying to clear online users...")
+                    self.clear_online_members()
+                    yield from self.send_to_debug_channel("Cleared currently online members")
                 elif "I LOVE" in msg.upper():
                     yield from self.send_message(message.channel, "I am sure you do ;) :panda_face: ")
                 elif "I HATE" in msg.upper():
