@@ -271,7 +271,7 @@ class MyDiscordBotClient(discord.Client):
                     AbstractBotCommand.import_bot_commands(self.model, self)
                     avail_cmds = " ".join(AbstractBotCommand.available_commands.keys())
                     yield from self.send_to_debug_channel("Commands reloaded! Available commands: " + avail_cmds)
-                elif msg.startswith("!reload_commands") and message.channel == self.debug_channel:
+                elif msg.startswith("!clear_online_members") and message.channel == self.debug_channel:
                     logging.info("Trying to clear online users...")
                     self.clear_online_members()
                     yield from self.send_to_debug_channel("Cleared currently online members")
