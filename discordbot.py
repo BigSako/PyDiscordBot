@@ -351,13 +351,13 @@ class MyDiscordBotClient(discord.Client):
 
             if len(roles_to_add) > 0:
                 yield from self.add_roles(member, *roles_to_add)
-                yield from asyncio.sleep(0.2)
+                yield from asyncio.sleep(0.5)
         except:
             logging.info("Caught an exception in verify_member_roles... Probably rate limited?")
             tb = traceback.format_exc()
             logging.info(str(sys.exc_info()[0]))
             logging.info(tb)
-            yield from asyncio.sleep(2)
+            yield from asyncio.sleep(3)
 
 
     @asyncio.coroutine

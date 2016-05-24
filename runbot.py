@@ -33,7 +33,17 @@ import discord
 
 from  discordbot import MyDiscordBotClient
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+
+
+logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+# make sure to log to console and file simultaneously
+rootLogger = logging.getLogger()
+
+fileHandler = logging.FileHandler("log.txt")
+fileHandler.setFormatter(logFormatter)
+rootLogger.addHandler(fileHandler)
+
 
 
 class MyBotApp:
@@ -49,6 +59,7 @@ class MyBotApp:
 
         self.db = None # type: pymysql.connections.Connection
         if self.connectToDB(args, config) == None:
+            logging.info('Stopping...')
             return # could not connect to DB, exiting...
 
         # start bot, close with ctrl-c
@@ -70,7 +81,7 @@ class MyBotApp:
 
         i=0
         stop = False
-        while not stop:
+        while not stop and i < 10:
             logging.info("Trying to connect bot (run %d)", i)
             client = None
             try:
@@ -85,18 +96,20 @@ class MyBotApp:
                 # use run_until_complete manually, as described in client.run()
                 client.loop.run_until_complete(client.start(config.get('Discord', 'discorduser'),
                            config.get('Discord', 'discordpass')))
+                # if this finished, the bot either crashed OR user pressed ctrl+c (caught by keyboardinterrupt)
 
                 logging.info("client.run() finished! Trying to stop additional loops")
                 client.stop_additional_loops()
 
                 # in case we are continuing: get a new event loop
+                logging.info("getting a new event loop")
                 client.loop = asyncio.new_event_loop()
             except KeyboardInterrupt:
-                logging.info("Loop interruped with CTRL-C, exiting...")
+                logging.info("Got Keyboard Interrupt (loop interruped with CTRL-C), exiting...")
                 client.loop.run_until_complete(client.logout())
                 stop = True
             except (discord.ClientException, websockets.exceptions.InvalidState, RuntimeError) as e:
-                logging.info("Got exception while MyDiscordBotClient.run(): " + str(e))
+                logging.info("Got ClientException while MyDiscordBotClient.run(): " + str(e))
                 logging.error(e, exc_info=True)
             except:
                 logging.info("Got an unhandled exception while MyDiscordBotClient.run()")
@@ -108,9 +121,11 @@ class MyBotApp:
                     client.loop.close()
 
             if not stop:
-                logging.info("Bot crashed? Not sure... waiting 60 seconds before doing anything else")
+                logging.error("Bot crashed? Not sure... waiting 60 seconds before doing anything else")
                 time.sleep(60) # wait 30 seconds, then reconnect
                 i += 1
+            else:
+                logging.info("Definately stopping bot...")
         logging.info("Gracefully shutting down...")
 
 
@@ -121,7 +136,7 @@ class MyBotApp:
         """
         if self.db == None:
             # try connection to the database
-            logging.info("Connecting to database")
+            logging.debug("Connecting to database")
             try:
                 self.db = pymysql.connect(host=config.get('Database', 'dbhost'),
                                              user=config.get('Database', 'dbuser'),
@@ -129,10 +144,10 @@ class MyBotApp:
                                              db=config.get('Database', 'dbname'),
                                              charset='utf8mb4',
                                              cursorclass=pymysql.cursors.DictCursor)
-
+                logging.info("Successfully connected to database")
                 return self.db
             except:
-                logging.error("Failed to connect to database")
+                logging.error("Failed to connect to database", exc_info=True)
                 return None
         else: # oh we already have it, fine
             return self.db
@@ -176,8 +191,8 @@ if __name__ == "__main__":
         try:
             app = MyBotApp()
         except:
-            logging.info("Unhandled Exception got out...")
-            logging.error(sys.exc_info()[0])
+            logging.error("Unhandled Exception got out...", exc_info=True)
 
         print("Removing discord.lock")
         os.remove("discord.lock")
+    print("closed")
