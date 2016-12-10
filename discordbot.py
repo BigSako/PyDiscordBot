@@ -404,7 +404,7 @@ class MyDiscordBotClient(discord.Client):
                             new_msg = "@everyone " + msgs[i]['from'] + ": " + msgs[i]['message']
                             logging.info("Fleetbot(%s): %s", group, new_msg)
                             cnt_tries = 0
-                            while cnt_tries < 4:
+                            while cnt_tries < 1:
                                 try:
                                     cnt_tries += 1
                                     yield from self.send_to_fleetbot_channel(group, new_msg)
