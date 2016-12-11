@@ -38,7 +38,8 @@ class MyDiscordBotClient(discord.Client):
     """ Creates a discord client application based on discord.Client, which
     handles authentication with a pre-defined EvE Online auth database """
     def __init__(self, db, debug_channel_name, auth_website, main_server_id,
-                 time_dep_groups, fleetbot_channels, post_expensive_killmails_to):
+                 time_dep_groups, fleetbot_channels, post_expensive_killmails_to,
+                 run_verify_user_loop=True):
         self.db = db # the database
         self.debug_channel_name = debug_channel_name
         self.auth_website = auth_website
@@ -72,6 +73,9 @@ class MyDiscordBotClient(discord.Client):
         self.verify_users_loop = None
         self.forward_fleetbot_loop = None
         self.forward_zkill_loop = None
+
+        self.do_verify_users = run_verify_user_loop
+
 
         if time_dep_groups != "":
             logging.info("Parsing time_dep_groups=" + time_dep_groups)
@@ -385,39 +389,49 @@ class MyDiscordBotClient(discord.Client):
     def forward_fleetbot_messages(self):
         """ Method for forwarding messages to fleetbot channels """
         logging.info("starting forward_fleetbot_messages loop")
+        try:
 
-        # store the highest fleetbot message id
-        last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
-
-        while True:
-            logging.info("Checking if there are new messages to forward for fleetbot")
-            # get up2date messages from database
-            messages = self.model.get_fleetbot_messages(last_fleetbot_msg_id)
-            logging.info("Found %d messages with the following keys: %s", len(msgs), str(messages.keys()))
-
-            # go over all groups
-            for group in messages.keys():
-                logging.info("In for loop: group='%s'", group)
-                if group in self.group_channels.keys():
-                    msgs = messages[group]
-                    logging.info("There are %d messages available for group '%s'", len(msgs), group)
-
-                    for i in range(0, len(msgs)):
-                        if msgs[i]['forward']:
-                            new_msg = "@everyone " + msgs[i]['from'] + ": " + msgs[i]['message']
-                            logging.info("Fleetbot(%s): %s", group, new_msg)
-                            try:
-                                yield from self.send_to_fleetbot_channel(group, new_msg)
-                            except:
-                                logging.error("Caught exception while forwarding: " + str(sys.exc_info()[0]))
-                else:
-                    logging.info("Error: Could not find group with name '%s' to forward ...", group)
-
-            # update highest fleetbot message id
+            # store the highest fleetbot message id
             last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
 
-            yield from asyncio.sleep(30)
-        # end while
+            while True:
+                logging.info("Checking if there are new messages to forward for fleetbot")
+                # get up2date messages from database
+                messages = self.model.get_fleetbot_messages(last_fleetbot_msg_id)
+                logging.info("Found %d messages with the following keys: %s", len(messages.keys()), str(messages.keys()))
+
+                # go over all groups
+                for group in messages.keys():
+                    logging.info("In for loop: group='%s'", group)
+                    if group in self.group_channels.keys():
+                        msgs = messages[group]
+                        logging.info("There are %d messages available for group '%s'", len(msgs), group)
+
+                        for i in range(0, len(msgs)):
+                            if msgs[i]['forward']:
+                                new_msg = "@everyone " + msgs[i]['from'] + ": " + msgs[i]['message']
+                                logging.info("Fleetbot(%s): %s", group, new_msg)
+                                try:
+                                    yield from self.send_to_fleetbot_channel(group, new_msg)
+                                except:
+                                    logging.error("Caught exception while forwarding: " + str(sys.exc_info()[0]))
+                    else:
+                        logging.info("Error: Could not find group with name '%s' to forward ...", group)
+
+                # update highest fleetbot message id
+                last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
+
+                yield from asyncio.sleep(30)
+            # end while
+        except:
+            tb = traceback.format_exc()
+            logging.info(str(sys.exc_info()[0]))
+            logging.info(tb)
+
+            yield from self.send_to_debug_channel("An error happened: " + str(sys.exc_info()[0]) + "\n" + str(tb))
+
+
+            # also forward this to the debug channel
     # end def forward_fleetbot_messages
 
 
@@ -425,7 +439,7 @@ class MyDiscordBotClient(discord.Client):
         """ verify that groups of all users currently online are valid"""
         logging.info("Start loop: Verifying roles of users")
 
-        while True:
+        while self.do_verify_users:
             # update list of authed members from database
             self.authed_users = self.model.get_all_authed_members()
             #logging.info("Received %s authed users from database", len(self.authed_users))

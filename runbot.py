@@ -97,7 +97,9 @@ class MyBotApp:
                                             config.get('Discord', 'discordserverid'),
                                             config.get('Bot', 'time_dependent_groups'),
                                             config.get('Bot', 'fleetbot_channels'),
-                                            config.get('Bot', 'post_expensive_killmails_to'))
+                                            config.get('Bot', 'post_expensive_killmails_to'),
+                                            run_verify_user_loop=False  # ToDo: set this to true
+                                            )
                 logging.info("Calling client.run()")
                 # use run_until_complete manually, as described in client.run()
                 client.loop.run_until_complete(client.start(config.get('Discord', 'discorduser'),
