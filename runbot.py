@@ -98,7 +98,7 @@ class MyBotApp:
                                             config.get('Bot', 'time_dependent_groups'),
                                             config.get('Bot', 'fleetbot_channels'),
                                             config.get('Bot', 'post_expensive_killmails_to'),
-                                            run_verify_user_loop=False  # ToDo: set this to true
+                                            run_verify_user_loop=True  # ToDo: set this to true
                                             )
                 logging.info("Calling client.run()")
                 # use run_until_complete manually, as described in client.run()
