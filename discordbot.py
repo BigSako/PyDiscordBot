@@ -234,7 +234,7 @@ class MyDiscordBotClient(discord.Client):
         """Asynchronous event handler that's called every time a message is
         seen by this client (both, private as well as in channel)"""
 
-        if message.author.id != self.user.id: # message must not come from yourself
+        if message.author.id != self.user.id:  # message must not come from yourself
             if "Direct Message" in str(message.channel):
                 logging.info("Private message received from user '%s': '%s'",
                              str(message.author), str(message.content))
@@ -285,8 +285,8 @@ class MyDiscordBotClient(discord.Client):
                     yield from self.send_message(message.channel, ":laughing: :laughing: :laughing: :laughing: :laughing: ")
                 elif msg.startswith("!"):
                     yield from AbstractBotCommand.handle_msg(message)
-        else:
-            logging.debug("Ignoring message, because its from ourselves...")
+        # else:
+        #    logging.debug("Ignoring message, because its from ourselves...")
 
     @asyncio.coroutine
     def verify_member_roles(self, member, member_id):
