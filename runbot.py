@@ -21,9 +21,9 @@ import sys, os
 import string
 import asyncio
 import logging
+import logging.handlers
 import time
 import websockets.exceptions
-
 
 import pymysql
 import pymysql.cursors
@@ -35,12 +35,18 @@ from  discordbot import MyDiscordBotClient
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 
-
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 # make sure to log to console and file simultaneously
 rootLogger = logging.getLogger()
 
-fileHandler = logging.FileHandler("log.txt")
+
+# Add the log message handler to the logger and configure log rotation
+fileHandler = logging.handlers.RotatingFileHandler(
+    "logs/discord.log.txt",
+    maxBytes=2097152,  # 2 Megabyte
+    backupCount=99  # 99 log files allowed
+)
+
 fileHandler.setFormatter(logFormatter)
 rootLogger.addHandler(fileHandler)
 

@@ -384,7 +384,7 @@ class MyDiscordBotClient(discord.Client):
 
     def forward_fleetbot_messages(self):
         """ Method for forwarding messages to fleetbot channels """
-        logging.info("starting forward_fleetbot_messages")
+        logging.info("starting forward_fleetbot_messages loop")
 
         # store the highest fleetbot message id
         last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()

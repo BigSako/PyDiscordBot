@@ -93,12 +93,22 @@ class WhoisBotCommand:
         # get parameter, starts with < and ends with >
 
         if ">" in params and "<@" in params:
+            wanted_member_id = params[params.find("<@") + 2:params.find(">")]
+            if '!' in params:
+                wanted_member_id = wanted_member_id[1:]
 
-            wanted_member_id = params[params.find("<@")+2:params.find(">")]
             print("wanted_id=" + str(wanted_member_id))
             if wanted_member_id in self.client.authed_users:
                 char_data = self.model.get_discord_members_character_id(wanted_member_id)
-                yield from self.client.send_message(message.channel, "<@" + wanted_member_id + "> is also known as " + str(char_data))
+
+                combined_message = "<@%(author_id)s> is authed as %(char_name)s (%(corp_name)s)" % \
+                                   {
+                                       'author_id': wanted_member_id,
+                                       'char_name': char_data[0],
+                                       'corp_name': char_data[1]
+                                   }
+
+                yield from self.client.send_message(message.channel, combined_message)
             else:
                 yield from self.client.send_message(message.channel, "<@" + str(message.author.id) + "> I am sorry, I do not know this user!")
 
@@ -119,7 +129,14 @@ class WhoamiBotCommand:
 
         if message.author.id in self.client.authed_users:
             char_data = self.model.get_discord_members_character_id(message.author.id)
-            yield from self.client.send_message(message.channel, "<@" + message.author.id + "> is also known as " + str(char_data))
+            combined_message = "<@%(author_id)s> is authed as %(char_name)s (%(corp_name)s)" % \
+                               {
+                                   'author_id': message.author.id,
+                                   'char_name': char_data[0],
+                                   'corp_name': char_data[1]
+                               }
+
+            yield from self.client.send_message(message.channel, combined_message)
         else:
             yield from self.client.send_message(message.channel, "<@" + str(message.author.id) + "> I am sorry, I do not know you!")
 

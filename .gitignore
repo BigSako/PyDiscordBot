@@ -3,3 +3,5 @@
 /virtualenv
 /discord.lock
 log.txt
+logs/*.log*
+.idea/
