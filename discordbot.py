@@ -393,26 +393,23 @@ class MyDiscordBotClient(discord.Client):
             logging.info("Checking if there are new messages to forward for fleetbot")
             # get up2date messages from database
             messages = self.model.get_fleetbot_messages(last_fleetbot_msg_id)
+            logging.info("Found %d messages with the following keys: %s", len(msgs), str(messages.keys()))
+
             # go over all groups
             for group in messages.keys():
+                logging.info("In for loop: group='%s'", group)
                 if group in self.group_channels.keys():
                     msgs = messages[group]
-                    logging.info("There are %d messages available for group %s", len(msgs), group)
+                    logging.info("There are %d messages available for group '%s'", len(msgs), group)
 
                     for i in range(0, len(msgs)):
                         if msgs[i]['forward']:
                             new_msg = "@everyone " + msgs[i]['from'] + ": " + msgs[i]['message']
                             logging.info("Fleetbot(%s): %s", group, new_msg)
-                            cnt_tries = 0
-                            while cnt_tries < 1:
-                                try:
-                                    cnt_tries += 1
-                                    yield from self.send_to_fleetbot_channel(group, new_msg)
-                                    break
-                                except:
-                                    logging.error("Caught exception while forwarding: " + str(sys.exc_info()[0]))
-                                    logging.info("trying to send message again in 5 seconds...")
-                                    yield from asyncio.sleep(5) # wait 1 second
+                            try:
+                                yield from self.send_to_fleetbot_channel(group, new_msg)
+                            except:
+                                logging.error("Caught exception while forwarding: " + str(sys.exc_info()[0]))
                 else:
                     logging.info("Error: Could not find group with name '%s' to forward ...", group)
 
@@ -484,19 +481,13 @@ class MyDiscordBotClient(discord.Client):
                         logging.info("A new user connected to the server: Name='{}', Status='{}', ID='{}', Server='{}'".format(member.name, member.status, member_id, member.server))
                         newOnlineMembers[member_id] = member
 
-
                         # this user just got online and is not authed! ask this user to auth
-                        retry_cnt = 0
-                        while retry_cnt < 4:
-                            try:
-                                retry_cnt += 1
-                                yield from self.send_message(member,
-                                                         """Hi! You need to authenticate to be able to use this Discord server. Please go to {} to obtain your authorization token (starting with auth=), and then just message the full token (including auth=) to me!""".format(self.auth_website))
-                                break
-                            except:
-                                logging.info("Got an error while sending message to new user: " + sys.exc_info()[0])
-                                logging.info("trying again in 5 seconds")
-                                yield from asyncio.sleep(5)
+                        try:
+                            yield from self.send_message(member,
+                                                     """Hi! You need to authenticate to be able to use this Discord server. Please go to {} to obtain your authorization token (starting with auth=), and then just message the full token (including auth=) to me!""".format(self.auth_website))
+                        except:
+                            logging.info("Got an error while sending message to new user: " + sys.exc_info()[0])
+
 
                         yield from self.send_to_debug_channel("Non authed user {} just connected, asking user to auth...".format(member.name))
                     else:
