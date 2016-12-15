@@ -87,10 +87,11 @@ class MyBotApp:
 
         i=0
         stop = False
-        while not stop and i < 10:
+        while not stop and i < 5:
             logging.info("Trying to connect bot (run %d)", i)
             client = None
             try:
+                logging.info('Init MyDiscordBotClient')
                 client = MyDiscordBotClient(self.db,
                                             config.get('Bot', 'debug_channel_name'),
                                             config.get('Bot', 'auth_website'),

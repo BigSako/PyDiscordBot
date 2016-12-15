@@ -137,6 +137,9 @@ class MyDiscordBotClient(discord.Client):
         loop = asyncio.get_event_loop()
         self.verify_users_loop = asyncio.async(self.verify_users(self.main_server))
         if len(self.fleetbot_channels) > 0:
+            logging.info("Starting new fleetbot loop, checking old loop before")
+            logging.info(self.forward_fleetbot_loop)
+
             self.forward_fleetbot_loop = asyncio.async(self.forward_fleetbot_messages())
 
         # start forward zkill loop
@@ -404,6 +407,7 @@ class MyDiscordBotClient(discord.Client):
                 for group in messages.keys():
                     logging.info("In for loop: group='%s'", group)
                     if group in self.group_channels.keys():
+                        # get messages for group
                         msgs = messages[group]
                         logging.info("There are %d messages available for group '%s'", len(msgs), group)
 
@@ -420,6 +424,7 @@ class MyDiscordBotClient(discord.Client):
 
                 # update highest fleetbot message id
                 last_fleetbot_msg_id = self.model.get_fleetbot_max_message_id()
+                logging.info("Last Fleetbot message id = " + str(last_fleetbot_msg_id))
 
                 yield from asyncio.sleep(30)
             # end while
@@ -531,5 +536,7 @@ class MyDiscordBotClient(discord.Client):
     def send_to_fleetbot_channel(self, group, msg):
         """ sends a message to a fleetbot channel """
         if group in self.group_channels:
+            logging.info("send_to_fleetbot_channel: Sending to the following channels: " + str(self.group_channels[group]))
             for channel in self.group_channels[group]:
+                logging.info("send_to_fleetbot_channel(" + str(group) + ", msg): channel = " + str(channel))
                 yield from self.send_message(channel, msg)
