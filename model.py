@@ -291,9 +291,6 @@ class MyDBModel:
                 if group not in messages_by_group:
                     messages_by_group[group] = []
 
-                if row['from_character'] == "EVILDEAD12" or row['from_character'] == "MERCIE1":
-                    continue
-
                 messages_by_group[group].append(
                     {
                         'id': row['id'],
