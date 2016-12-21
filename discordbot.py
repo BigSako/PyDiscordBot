@@ -31,7 +31,6 @@ cookie_messages = ["I think you need a :cookie:", "Have a :cookie:",
                    "Waiting on a cookie delivery...", "Nobody ever gives me cookies :(",
                    "Omnomnomnom sorry, that was the last one!"]
 
-
 # Create a subclass of Client that defines our own event handlers
 # Another option is just to write functions decorated with @client.async_event
 class MyDiscordBotClient(discord.Client):
@@ -278,6 +277,9 @@ class MyDiscordBotClient(discord.Client):
                     AbstractBotCommand.import_bot_commands(self.model, self)
                     avail_cmds = " ".join(AbstractBotCommand.available_commands.keys())
                     yield from self.send_to_debug_channel("Commands reloaded! Available commands: " + avail_cmds)
+                elif msg.startswith("!restart") and message.channel == self.debug_channel:
+                    logging.info("restarting the bot...")
+                    raise KeyboardInterrupt
                 elif msg.startswith("!clear_online_members") and message.channel == self.debug_channel:
                     logging.info("Trying to clear online users...")
                     self.clear_online_members()
