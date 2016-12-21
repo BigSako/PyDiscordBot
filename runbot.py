@@ -87,7 +87,7 @@ class MyBotApp:
 
         i=0
         stop = False
-        while not stop and i < 5:
+        while not stop and i < 1:
             logging.info("Trying to connect bot (run %d)", i)
             client = None
             try:
