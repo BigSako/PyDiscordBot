@@ -425,8 +425,12 @@ class CookieBotCommand:
                        "https://www.youtube.com/watch?v=-qTIGg3I5y8", "I think you had enough!",
                        "Okay, but only one more :cookie:!", "I like cookies too! :thumbsup:",
                        "C O O K I E", ":cookie: :cookie: :cookie: :cookie: :cookie: :cookie: :cookie: :cookie:",
-                       "Cafe?", "Beer?", "Cake?", "One cookie for you. One cookie. I said one! :cookie: ",
+                       "Cafe?", "Beer?", "Cake? :cake: ", "One cookie for you. One cookie. I said one! :cookie: ",
+                       "Okay... I'm running to the store and getting some new cookies! BRB",
+                       "Here is a cookie! But you must promise to not give it to PK...",
+                       "There you go! :cookie: Do you want some !whiskey to your cookie?",
                        "All you eat is cookies... ", "All your cookies are belong to us",
+                       "https://img.clipartfest.com/bfc51976969548980749767cd0a684b2_cookie-monster-as-a-baby-cookie-monster-clipart-baby_236-236.jpeg",
                        "http://rack.0.mshcdn.com/media/ZgkyMDEzLzEwLzA3L2JmL0Nvb2tpZU1vbnN0LmE4NjZlLmpwZwpwCXRodW1iCTk1MHg1MzQjCmUJanBn/19941105/9eb/CookieMonster.jpg",
                        "http://orig08.deviantart.net/357b/f/2011/235/d/8/cute_cookie_x3_by_lanahx3-d47lt9o.jpg",
                        "You want cookie? Yes no spain?",
@@ -437,9 +441,11 @@ class CookieBotCommand:
                        "http://i4.manchestereveningnews.co.uk/incoming/article10580003.ece/ALTERNATES/s615/JS47622759.jpg",
                        "Waiting on a cookie delivery... :car: ", "Nobody ever gives me cookies :(",
                        "Omnomnomnom sorry, that was the last one! :cry: ",
+                       "Are you feeling crummy? :cookie:", "Why do we cook bacon and bake cookies? Have a :cookie: and have some bacon!"
                        "You want my :cookie:?", "I give you :cookie: "]
 
-    positive_cookie_messages = ["Have a :cookie:!", "I think you need a :cookie:!",
+    positive_cookie_messages = ["Have a :cookie:!", "I think you need a :cookie:!", ":cookie:", ":cookie: :cookie:",
+                                "https://s-media-cache-ak0.pinimg.com/originals/e2/19/4e/e2194ed9ddd506819268f8d4dda56708.jpg",
                                 "Want a :cookie:?", "Have two :cookie:!"]
 
     def __init__(self, db_model, discord_client):
