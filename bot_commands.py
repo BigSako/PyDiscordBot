@@ -222,7 +222,9 @@ class VerifyMemberRolesCommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         if message.channel == self.client.debug_channel:
-            yield from self.client.verify_member_roles(message.author, message.author.id)
+            yield from self.client.verify_member_roles(
+                self.client.get_sever_member_by_id(self.client.main_server,
+                                                   message.author.id), message.author.id)
 
 
 class UpdateRolesCommand:

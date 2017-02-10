@@ -450,6 +450,12 @@ class MyDiscordBotClient(discord.Client):
             # also forward this to the debug channel
     # end def forward_fleetbot_messages
 
+    def get_sever_member_by_id(self, server, member_id):
+        for member in server.members:
+            if member.id == member_id:
+                return member
+
+        return None
 
     def verify_users(self, server):
         """ verify that groups of all users currently online are valid"""
@@ -471,7 +477,7 @@ class MyDiscordBotClient(discord.Client):
             # iterate over all members:
             for member in server.members:
                 if member.id == self.user.id:
-                    continue # ship yourself
+                    continue  # skip own bot user
 
                 #if str(member.status) == 'offline':
                 #    continue # no need to process offline members for now
