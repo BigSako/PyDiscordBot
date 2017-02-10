@@ -213,20 +213,6 @@ class ListMyRolesCommand:
             yield from self.client.send_message(message.channel, ",".join(roles))
 
 
-class VerifyMemberRolesCommand:
-    def __init__(self, db_model, discord_client):
-        self.client = discord_client
-        self.model = db_model
-        self.cmd = "!verify_roles"
-
-    @asyncio.coroutine
-    def handle_command(self, message, cmd, params):
-        if message.channel == self.client.debug_channel:
-            yield from self.client.verify_member_roles(
-                self.client.get_sever_member_by_id(self.client.main_server,
-                                                   message.author.id), message.author.id)
-
-
 class UpdateRolesCommand:
     def __init__(self, db_model, discord_client):
         self.client = discord_client

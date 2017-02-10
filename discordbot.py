@@ -471,7 +471,7 @@ class MyDiscordBotClient(discord.Client):
 
             number_authed_users = 0
 
-            logging.info("Checking all members that are connected on server...")
+            logging.info("Checking all members that are connected on server (length={})...".format(len(server.members)))
 
 
             # iterate over all members:
@@ -494,6 +494,8 @@ class MyDiscordBotClient(discord.Client):
                     if member_id not in self.currently_online_members:
                         logging.info("User %s just connected, already authed!", member.name)
                         newOnlineMembers[member_id] = member
+
+                    logging.info("Checking roles for member id={} name={}".format(member_id, member.name))
 
                     # else: we already know this user, user is authed. check for any role updates
                     yield from self.verify_member_roles(member, member_id)
