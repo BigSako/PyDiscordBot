@@ -202,7 +202,7 @@ class UptimeBotCommand:
 
 class ListMyRolesCommand:
     def __init__(self, db_model, discord_client):
-        self.client = discord.client
+        self.client = discord_client
         self.model = db_model
         self.cmd = "!list_my_roles"
 
@@ -215,7 +215,7 @@ class ListMyRolesCommand:
 
 class VerifyMemberRolesCommand:
     def __init__(self, db_model, discord_client):
-        self.client = discord.client
+        self.client = discord_client
         self.model = db_model
         self.cmd = "!verify_roles"
 
