@@ -209,7 +209,7 @@ class ListMyRolesCommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         if message.channel == self.client.debug_channel:
-            roles = self.client.list_member_roles(message.author.id)
+            roles = self.client.get_member_roles(message.author.id)
             yield from self.client.send_message(message.channel, ",".join(roles))
 
 
