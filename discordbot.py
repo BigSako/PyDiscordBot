@@ -179,7 +179,6 @@ class MyDiscordBotClient(discord.Client):
             if channel.name == self.post_expensive_killmails_to:
                 self.post_expensive_killmails_channel = channel
 
-
     def update_roles(self, server):
         """ Update the list of roles """
         self.roles.clear()
@@ -190,12 +189,11 @@ class MyDiscordBotClient(discord.Client):
 
         self.everyone_group = server.default_role
 
-
     def get_roles_str(self, server):
         """ Returns a list of roles as a string """
         retstr = ""
         for role in self.roles:
-            retstr = retstr + str(role) + " " + str(self.roles[role].name)  + ", "
+            retstr = retstr + str(role) + " " + str(self.roles[role].name)  + ", \n"
 
         return retstr
 
@@ -294,8 +292,8 @@ class MyDiscordBotClient(discord.Client):
                     yield from self.send_message(message.channel, ":laughing: :laughing: :laughing: :laughing: :laughing: ")
                 elif msg.startswith("!"):
                     yield from AbstractBotCommand.handle_msg(message)
-        # else:
-        #    logging.debug("Ignoring message, because its from ourselves...")
+                    # else:
+                    #    logging.debug("Ignoring message, because its from ourselves...")
 
     @asyncio.coroutine
     def verify_member_roles(self, member, member_id):
@@ -351,12 +349,16 @@ class MyDiscordBotClient(discord.Client):
             roles_to_add = []
             # anything left in should_have_roles should be assigned
             for role_id in should_have_roles:
+                # try to find role_id in self.roles
                 if role_id in self.roles:
                     role = self.roles[role_id]
                     logging.info("Member {} is missing role {} (ID: {}), adding it now".format(member.name, role.name, role.id))
                     roles_to_add.append(role)
                 else:
-                    logging.error("Member %s is missing role %s, tried to add it but I dont know that role...", member.name, role_id)
+                    logging.error("Member {} is missing role with role_id='{}', tried to add it but I could not find that role... Available roles are: {}".format(member.name, role_id, self.roles.keys()))
+                    yield from self.send_to_debug_channel(
+                        "Member {} is missing role with role_id='{}', tried to add it but I could not find that role... Available roles are: {}".format(
+                            member.name, role_id, self.roles.keys()))
 
             if len(roles_to_add) > 0:
                 yield from self.add_roles(member, *roles_to_add)
@@ -429,7 +431,7 @@ class MyDiscordBotClient(discord.Client):
                 logging.info("Last Fleetbot message id = " + str(last_fleetbot_msg_id))
 
                 yield from asyncio.sleep(30)
-            # end while
+                # end while
         except:
             tb = traceback.format_exc()
             logging.info(str(sys.exc_info()[0]))
@@ -505,7 +507,7 @@ class MyDiscordBotClient(discord.Client):
                         # this user just got online and is not authed! ask this user to auth
                         try:
                             yield from self.send_message(member,
-                                                     """Hi! You need to authenticate to be able to use this Discord server. Please go to {} to obtain your authorization token (starting with auth=), and then just message the full token (including auth=) to me!""".format(self.auth_website))
+                                                         """Hi! You need to authenticate to be able to use this Discord server. Please go to {} to obtain your authorization token (starting with auth=), and then just message the full token (including auth=) to me!""".format(self.auth_website))
                         except:
                             logging.info("Got an error while sending message to new user: " + sys.exc_info()[0])
 
@@ -524,7 +526,7 @@ class MyDiscordBotClient(discord.Client):
             self.currently_online_members = allOnlineMembers
 
             yield from asyncio.sleep(30)
-        # end while
+            # end while
     # end everify users
 
 
