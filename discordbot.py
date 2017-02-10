@@ -295,37 +295,44 @@ class MyDiscordBotClient(discord.Client):
                     # else:
                     #    logging.debug("Ignoring message, because its from ourselves...")
 
+
+    def get_member_roles(self, member_id):
+        """ returns a list of roles that the member should have """
+        should_have_roles = self.model.get_roles_for_member(member_id)
+
+        ping_start_hour = int(self.authed_users[member_id]['start_hour'])
+        ping_stop_hour = int(self.authed_users[member_id]['stop_hour'])
+
+        cur_hour = datetime.utcnow().hour
+
+        do_time_dep_roles = False
+
+        # case 0: user does not care about any time dependency
+        if ping_start_hour == 0 and ping_stop_hour == 0:
+            do_time_dep_roles = True  # always assign
+        else:
+            # case 1: ping_start_hour < ping_stop_hour, e.g., between 8 and 22 hours
+            if ping_start_hour < ping_stop_hour and cur_hour >= ping_start_hour and cur_hour < ping_stop_hour:
+                do_time_dep_roles = True
+
+            # case 2: ping_start_hour > ping_stop_hour, e.g., between 16 and 4 hours
+            if ping_start_hour > ping_stop_hour and (cur_hour >= ping_start_hour or cur_hour < ping_stop_hour):
+                do_time_dep_roles = True
+
+        if do_time_dep_roles:
+            for role in should_have_roles:
+                if role in self.timedep_group_assignment:
+                    should_have_roles.append(self.timedep_group_assignment[role])
+
+        return should_have_roles
+
+
     @asyncio.coroutine
     def verify_member_roles(self, member, member_id):
         """ checks the roles of a single member, and adds or removes them as needed """
         try:
             # which roles should this member have
-            should_have_roles = self.model.get_roles_for_member(member_id)
-
-            ping_start_hour = int(self.authed_users[member_id]['start_hour'])
-            ping_stop_hour = int(self.authed_users[member_id]['stop_hour'])
-
-            cur_hour = datetime.utcnow().hour
-
-            do_time_dep_roles = False
-
-            # case 0: user does not care about any time dependency
-            if ping_start_hour == 0 and ping_stop_hour == 0:
-                do_time_dep_roles = True # always assign
-            else:
-                # case 1: ping_start_hour < ping_stop_hour, e.g., between 8 and 22 hours
-                if ping_start_hour < ping_stop_hour and cur_hour >= ping_start_hour and cur_hour < ping_stop_hour:
-                    do_time_dep_roles = True
-
-                # case 2: ping_start_hour > ping_stop_hour, e.g., between 16 and 4 hours
-                if ping_start_hour > ping_stop_hour and (cur_hour >= ping_start_hour or cur_hour < ping_stop_hour):
-                    do_time_dep_roles = True
-
-
-            if do_time_dep_roles:
-                for role in should_have_roles:
-                    if role in self.timedep_group_assignment:
-                        should_have_roles.append(self.timedep_group_assignment[role])
+            should_have_roles = self.get_member_roles(member_id)
 
             # check if there are any roles that we need to remove
             roles_to_remove = []

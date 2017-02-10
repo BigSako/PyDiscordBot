@@ -200,6 +200,30 @@ class UptimeBotCommand:
         yield from self.client.send_message(message.channel, "I'm up since " + str(self.client.start_time))
 
 
+class ListMyRolesCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord.client
+        self.model = db_model
+        self.cmd = "!list_my_roles"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        if message.channel == self.client.debug_channel:
+            roles = self.client.list_member_roles(message.author.id)
+            yield from self.client.send_message(message.channel, ",".join(roles))
+
+
+class VerifyMemberRolesCommand:
+    def __init__(self, db_model, discord_client):
+        self.client = discord.client
+        self.model = db_model
+        self.cmd = "!verify_roles"
+
+    @asyncio.coroutine
+    def handle_command(self, message, cmd, params):
+        if message.channel == self.client.debug_channel:
+            yield from self.client.verify_member_roles(message.author, message.author.id)
+
 
 class UpdateRolesCommand:
     def __init__(self, db_model, discord_client):
