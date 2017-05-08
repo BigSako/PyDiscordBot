@@ -453,6 +453,8 @@ class CookieBotCommand:
                        "http://i4.manchestereveningnews.co.uk/incoming/article10580003.ece/ALTERNATES/s615/JS47622759.jpg",
                        "Waiting on a cookie delivery... :car: ", "Nobody ever gives me cookies :(",
                        "Omnomnomnom sorry, that was the last one! :cry: ",
+                       "https://cdn75.picsart.com/185646673001202.png?r1024x1024",
+                       "https://www.youtube.com/watch?v=o41k-faChfA",
                        "Are you feeling crummy? :cookie:", "Why do we cook bacon and bake cookies? Have a :cookie: and have some bacon!"
                        "You want my :cookie:?", "I give you :cookie: "]
 
@@ -543,7 +545,7 @@ class OpsBotcommand:
     @asyncio.coroutine
     def handle_command(self, message, cmd, params):
         logging.info("in OpsBotcommand.handle_command()")
-        yield from self.client.send_message(message.channel, "https://ops.ncdot.co.uk/ (please log in using ncdot core auth)")
+        yield from self.client.send_message(message.channel, "Please visit https://ncdot.co.uk/forum/")
 
 
 class HelpBotcommand:
